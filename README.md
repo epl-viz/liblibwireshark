@@ -1,18 +1,17 @@
-#### Sample project showcasing stand-alone use of libwireshark.
+#### Wrapper for libwireshark
 
-Tested working with Wireshark `v2.3.0rc0-2009-gd8be254a51` on macOS Sierra. Keep in mind, that libwireshark is not public API and may change.
+As libwireshark is not public API, it is prone to change and break non-official tools depending on it.
+This project aims to provide a thin frequently-updated wrapper around the core capture/dissect functionality that other applications can then link against.
+
+
+Tested working with Wireshark `v2.2.4` on macOS Sierra.
 
 #### Usage
 
     mkdir build && cd build
     cmake ..
     make
-    ./libwireshark-example1 -f ../test/1.pcap
-    ./libwireshark-example2 -f ../test/http.pcap
-
-#### Description
-
-At Wireshark's heart lies EPAN, which exposes the API required by the dissectors to interact with wireshark. Wiretap
+    ./simple_print -f ../test/1.pcap
 
 #### License
 
