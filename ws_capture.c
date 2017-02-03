@@ -16,7 +16,9 @@
 
 #include "ws_capture-internal.h"
 
+#if 0 // error: ‘tshark_get_frame_ts’ defined but not used [-Werror=unused-function]
 static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
+#endif
 
 int ws_capture_init(void) {
 	init_process_policies();
@@ -75,6 +77,7 @@ void ws_capture_close(ws_capture_t *cap) {
 void ws_capture_finalize(void) {
 }
 
+#if 0 // error: ‘tshark_get_frame_ts’ defined but not used [-Werror=unused-function]
 static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
 {
     capture_file *cf = (capture_file *) data;
@@ -96,3 +99,4 @@ static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
 
     return NULL;
 }
+#endif
