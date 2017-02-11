@@ -39,6 +39,7 @@ int ws_capture_init(void) {
  * \brief Opens a packet capture file (*.pcap)
  */
 ws_capture_t *ws_capture_open_offline(const char *path, int flags) {
+    assert(flags == 0);
     int err = 0;
     char *err_info = NULL;
     Buffer buf;
