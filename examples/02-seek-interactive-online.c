@@ -9,48 +9,24 @@
 #include <string.h>
 #include <unistd.h>
 
-enum print_type {
-    PRINT_MANUAL,
-    PRINT_TEXT,
-};
-
-static void print_each_packet_text(ws_dissect_t *handle);
-static void print_each_packet_manual(ws_dissect_t *handle);
-
+static void visit(proto_tree *node, gpointer data);
 static void print_usage(char *argv[]) {
-    printf("Usage: %s -f <input_file> ", argv[0]);
-    printf("[-t <manual|text> (default text)]\n");
+    printf("Usage: %s <input_file> ", argv[0]);
 }
 
 int main(int argc, char *argv[]) {
     char *          filename   = NULL;
-    enum print_type print_type = PRINT_TEXT;
     int             opt;
-
-
-    while ((opt = getopt(argc, argv, "f:t:")) != -1) {
-        switch (opt) {
-            case 'f': filename = strdup(optarg); break;
-            case 't':
-                      if (strcmp(optarg, "manual") == 0) {
-                          print_type = PRINT_MANUAL;
-                      } else if (strcmp(optarg, "text") == 0) {
-                          print_type = PRINT_TEXT;
-                      }
-                      break;
-            default: print_usage(argv); return 1;
-        }
-    }
-
-
-    if (filename == NULL) {
+    
+    if (argc != 2) {
         print_usage(argv);
         return 1;
     }
+    filename = argv[1];
 
     if (access(filename, F_OK) == -1) {
         fprintf(stderr, "File '%s' doesn't exist.\n", filename);
-        return 1;
+        return 2;
     }
 
 
@@ -63,10 +39,12 @@ int main(int argc, char *argv[]) {
     ws_dissect_t *dissector = ws_dissect_capture(cap);
     assert(dissector);
 
-    switch (print_type) {
-        case PRINT_MANUAL: print_each_packet_manual(dissector); break;
-        case PRINT_TEXT: print_each_packet_text(dissector); break;
+    struct ws_dissection packet;
+    while (ws_dissect_next(dissector, &packet)) {
+        proto_tree_children_foreach(packet.edt->tree, visit, NULL);
+        puts("\n===================");
     }
+
 
     ws_dissect_free(dissector);
     ws_capture_close(cap);

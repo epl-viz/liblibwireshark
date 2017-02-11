@@ -8,6 +8,8 @@
 #include <wsutil/nstime.h>
 #include <frame_tvbuff.h>
 #include <assert.h>
+#include <stdio.h>
+
 
 #include "ws_capture-internal.h"
 
@@ -97,14 +99,11 @@ int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
     cfile->prev_cap = cfile->prev_dis = frame_data_sequence_add(cfile->frames, &fdlocal);
 
     assert(dst);
-    dst->tree = src->edt->tree;
+    dst->edt = src->edt;
+    dst->offset = data_offset;
 
     frame_data_destroy(&fdlocal);
     return 1;
-}
-
-epan_ws_dissect_t *ws_dissect_epan_get_np(ws_dissect_t *handle) {
-    return handle->edt;
 }
 
 /**
@@ -114,7 +113,59 @@ epan_ws_dissect_t *ws_dissect_epan_get_np(ws_dissect_t *handle) {
  * \brief Seeks to a specific poisition in the capture handle
  *        May dissect preceeding packets in order to establish cycle bondaries
  */
-int ws_dissect_seek(ws_dissect_t *dissector, unsigned cycle_num);
+int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_offset /*, int whence*/) {
+    int err = 0;
+    char *err_info = NULL;
+
+    static guint32 cum_bytes = 0;
+    capture_file *cfile = &src->cap->cfile;
+    Buffer *buf = &src->cap->buf;
+    epan_dissect_t *edt = NULL;
+    struct wtap_pkthdr phdr;
+    wtap_phdr_init(&phdr);
+
+    src->edt = NULL; // XXX remove dependency on src->edt
+    edt = epan_dissect_new(cfile->epan, TRUE, TRUE);
+
+    if (!wtap_seek_read(cfile->wth, data_offset, &phdr, buf, &err, &err_info)) {
+        return 0;
+    }
+    /*if (!wtap_read(cfile->wth, &err, &err_info, &data_offset)) {*/
+    cfile->count++;
+
+    frame_data fdlocal;
+    frame_data_init(&fdlocal, cfile->count, &phdr, data_offset, cum_bytes);
+
+    frame_data_set_before_dissect(&fdlocal, &cfile->elapsed_time, &cfile->ref, cfile->prev_dis);
+
+    epan_dissect_run_with_taps(edt, cfile->cd_t, &phdr, frame_tvbuff_new_buffer(&fdlocal, buf), &fdlocal, NULL);
+
+    frame_data_set_after_dissect(&fdlocal, &cum_bytes);
+    cfile->prev_cap = cfile->prev_dis = frame_data_sequence_add(cfile->frames, &fdlocal);
+
+    assert(dst);
+    dst->edt = edt;
+
+    frame_data_destroy(&fdlocal);
+    return 1;
+}
+int ws_dissect_tostr(struct ws_dissection *dissection, char **buf) {
+    assert(buf);
+    assert(*buf == NULL);
+    print_args_t    print_args   = {0};
+    GString *gstr = g_string_new(NULL);
+    print_stream_t *print_stream = ws_dissect_print_stream_gstring_new(gstr);
+
+    print_args.print_hex         = FALSE;
+    print_args.print_dissections = print_dissections_expanded;
+
+    proto_tree_print(&print_args, dissection->edt, NULL, print_stream);
+
+    *buf = g_string_free(gstr, FALSE);
+
+    destroy_print_stream(print_stream);
+    return 0;
+}
 /**
  * \param handle dissector handle
  *

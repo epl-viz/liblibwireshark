@@ -15,6 +15,7 @@ int ws_capture_init(void);
 /** handle identifying a online or offline capture */
 typedef struct ws_capture_t ws_capture_t;
 
+enum { WS_CAPTURE_SEQUENTIAL = 1 };
 /**
  * \param path to file to open
  * \param flags must be zero

@@ -39,12 +39,15 @@ int ws_capture_init(void) {
  * \brief Opens a packet capture file (*.pcap)
  */
 ws_capture_t *ws_capture_open_offline(const char *path, int flags) {
-    assert(flags == 0);
     int err = 0;
     char *err_info = NULL;
+    Buffer buf;
     capture_file cfile;
     cap_file_init(&cfile);
     cfile.filename = g_strdup(path);
+    /*if ((flags & WS_CAPTURE_SEQUENTIAL) == WS_CAPTURE_SEQUENTIAL) {*/
+    ws_buffer_init(&buf, 1500);
+
 
     cfile.wth = wtap_open_offline(cfile.filename, WTAP_TYPE_AUTO, &err, &err_info, TRUE);
     if (cfile.wth == NULL) {
@@ -58,6 +61,7 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags) {
 
     ws_capture_t *cap = g_malloc(sizeof *cap);
     cap->cfile = cfile;
+    cap->buf = buf;
 
     return cap;
 }
@@ -69,6 +73,8 @@ void ws_capture_close(ws_capture_t *cap) {
 
     wtap_close(cap->cfile.wth);
     cap->cfile.wth = NULL;
+    ws_buffer_free(&cap->buf);
+    g_free(cap->cfile.filename);
 
 
     g_free(cap);
