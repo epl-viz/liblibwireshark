@@ -9,6 +9,7 @@ set( CM_VERSION_SUBMINOR 2 )
 
 include( CMakePackageConfigHelpers )
 
+option( ENABLE_EXAMPLES "Enables the example exes" ON )
 
 if(MSVC)
   # Force to always compile with W4
@@ -73,23 +74,29 @@ add_definitions(-DWS_NORETURN=_Noreturn)
 
 target_link_libraries(${PROJECT_NAME} ${Wireshark_LIBRARY} wiretap wsutil ${GLIB_LIBRARIES})
 
-# examples
-# 0
-file(GLOB simple_print_src examples/00-simple-print.c)
-add_executable(simple_print ${simple_print_src})
-target_compile_options(simple_print PUBLIC ${GLIB_CFLAGS_OTHER})
-target_link_libraries(simple_print ${PROJECT_NAME} ${GLIB_LIBRARIES})
-# 1
-file(GLOB seek_offline_src examples/01-seek-interactive-offline.c)
-add_executable(seek_offline ${seek_offline_src})
-target_compile_options(seek_offline PUBLIC ${GLIB_CFLAGS_OTHER})
-target_link_libraries(seek_offline ${PROJECT_NAME} ${GLIB_LIBRARIES})
-# 2
-file(GLOB seek_online_src examples/02-seek-interactive-online.c)
-MESSAGE(STATUS ${seek_online_src})
-add_executable(seek_online ${seek_online_src})
-target_compile_options(seek_online PUBLIC ${GLIB_CFLAGS_OTHER})
-target_link_libraries(seek_online ${PROJECT_NAME} ${GLIB_LIBRARIES})
+if( ENABLE_EXAMPLES )
+
+  # examples
+  # 0
+  file(GLOB simple_print_src examples/00-simple-print.c)
+  add_executable(simple_print ${simple_print_src})
+  target_compile_options(simple_print PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(simple_print ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  # 1
+  file(GLOB seek_offline_src examples/01-seek-interactive-offline.c)
+  add_executable(seek_offline ${seek_offline_src})
+  target_compile_options(seek_offline PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(seek_offline ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  # 2
+  file(GLOB seek_online_src examples/02-seek-interactive-online.c)
+  MESSAGE(STATUS ${seek_online_src})
+  add_executable(seek_online ${seek_online_src})
+  target_compile_options(seek_online PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(seek_online ${PROJECT_NAME} ${GLIB_LIBRARIES})
+
+  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online )
+
+endif( ENABLE_EXAMPLES )
 
 # install
 write_basic_package_version_file(
@@ -98,7 +105,7 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-install( TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static simple_print seek_offline seek_online
+install( TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static ${EXAMPLE_INSTALL_TARGETS}
   EXPORT        ${PROJECT_NAME}Targets
   RUNTIME       DESTINATION bin
   ARCHIVE       DESTINATION lib
