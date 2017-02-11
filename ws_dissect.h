@@ -22,6 +22,9 @@ int ws_dissect_init(void);
 void ws_dissect_finalize(void);
 
 /*** error handling ***/
+enum ws_dissect_error {
+    WS_DISSECT_OK = 0,
+};
 /**
  * \returns a thread-local error code
  *
@@ -32,9 +35,6 @@ void ws_dissect_finalize(void);
  */
 enum ws_dissect_error ws_dissect_error(void);
 
-enum ws_dissect_error {
-    WS_DISSECT_OK = 0,
-};
 
 const char *ws_dissect_strerror(enum ws_dissect_error);
 
