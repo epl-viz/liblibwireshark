@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(libwireshark C)
 set(CMAKE_BUILD_TYPE Debug)
 
+
 set( CM_VERSION_MAJOR    0 )
 set( CM_VERSION_MINOR    0 )
 set( CM_VERSION_SUBMINOR 2 )
@@ -69,7 +70,7 @@ set_target_properties(
 
 add_definitions(-DWS_NORETURN=_Noreturn)
 
-target_link_libraries(${PROJECT_NAME} ${Wireshark_LIBRARY} wiretap wsutil)
+target_link_libraries(${PROJECT_NAME} ${Wireshark_LIBRARY} wiretap wsutil ${GLIB_LIBRARIES})
 
 # examples
 file(GLOB simple_print_src examples/00-simple-print.c)
@@ -99,3 +100,7 @@ install(
     ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake
   DESTINATION lib/cmake/${PROJECT_NAME}
 )
+
+IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/private.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/private.cmake)
+ENDIF()

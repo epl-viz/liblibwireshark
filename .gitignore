@@ -8,4 +8,5 @@ build/
 *.dylib
 *.pyc
 .DS_Store
+private.cmake
 
