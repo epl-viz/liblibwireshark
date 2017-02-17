@@ -52,7 +52,7 @@ ws_dissect_t *ws_dissect_capture(ws_capture_t *capture) {
     capture->cfile.epan->data = &capture->cfile;
 
     capture->cfile.epan->get_frame_ts = tshark_get_frame_ts;
-    
+
     ws_dissect_t *handle = g_malloc0(sizeof *handle);
     handle->cap = capture;
     return handle;
@@ -74,6 +74,7 @@ int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
     capture_file *cfile = &src->cap->cfile;
     struct wtap_pkthdr *whdr = wtap_phdr(cfile->wth);
     unsigned char      *buf = wtap_buf_ptr(cfile->wth);
+    static frame_data ref_frame;
 
 
     // clear last dissected buffer
@@ -92,6 +93,12 @@ int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
     frame_data_init(&fdlocal, cfile->count, whdr, data_offset, cum_bytes);
 
     frame_data_set_before_dissect(&fdlocal, &cfile->elapsed_time, &cfile->ref, cfile->prev_dis);
+
+    // TODO understand this code
+    if (cfile->ref == &fdlocal) {
+        ref_frame = fdlocal;
+        cfile->ref = &ref_frame;
+    }
 
     epan_dissect_run_with_taps(src->edt, cfile->cd_t, whdr, frame_tvbuff_new(&fdlocal, buf), &fdlocal, NULL);
 
@@ -122,6 +129,7 @@ int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_o
     Buffer *buf = &src->cap->buf;
     epan_dissect_t *edt = NULL;
     struct wtap_pkthdr phdr;
+    static frame_data ref_frame;
     wtap_phdr_init(&phdr);
 
     src->edt = NULL; // XXX remove dependency on src->edt
@@ -137,6 +145,11 @@ int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_o
     frame_data_init(&fdlocal, cfile->count, &phdr, data_offset, cum_bytes);
 
     frame_data_set_before_dissect(&fdlocal, &cfile->elapsed_time, &cfile->ref, cfile->prev_dis);
+
+    if (cfile->ref == &fdlocal) {
+        ref_frame = fdlocal;
+        cfile->ref = &ref_frame;
+    }
 
     epan_dissect_run_with_taps(edt, cfile->cd_t, &phdr, frame_tvbuff_new_buffer(&fdlocal, buf), &fdlocal, NULL);
 
@@ -199,3 +212,4 @@ static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
 
     return NULL;
 }
+
