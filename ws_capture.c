@@ -21,7 +21,7 @@ static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
 #endif
 
 int ws_capture_init(void) {
-	init_process_policies();
+    init_process_policies();
     wtap_init();
     /* Register all libwiretap plugin modules. */
     register_all_wiretap_modules();
@@ -69,13 +69,22 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags) {
 
 void ws_capture_close(ws_capture_t *cap) {
     if (!cap) return;
-//     free_frame_data_sequence(cap->cfile.frames); // FIXME: leaks memory
+    if (cap->cfile.frames) {
+        // FIXME: leaks memory
+        /*free_frame_data_sequence(cap->cfile.frames);*/
+        cap->cfile.frames = NULL;
+    }
     cap->cfile.frames = NULL;
 
     wtap_close(cap->cfile.wth);
-    cap->cfile.wth = NULL;
-    ws_buffer_free(&cap->buf);
+    /*if (cf->is_tempfile) ws_unlink(cf->filename);*/
     g_free(cap->cfile.filename);
+
+    wtap_phdr_cleanup(&cap->cfile.phdr);
+    ws_buffer_free(&cap->cfile.buf);
+    cap->cfile.wth = NULL;
+    dfilter_free(cap->cfile.rfcode);
+    ws_buffer_free(&cap->buf);
 
 
     g_free(cap);
