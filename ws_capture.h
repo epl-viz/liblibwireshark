@@ -5,62 +5,41 @@
 extern "C" {
 #endif
 
+#include <glib.h>
+
 /**
  * \brief initializes capturing capability
- * \note On Windows this would do thing like loading winsock
+ * \note On Windows this could do thing like loading winsock
  * \returns 0 on success, negative error code otherwise
  */
 int ws_capture_init(void);
 
-/** handle identifying a online or offline capture */
+/** handle identifying an online or offline capture */
 typedef struct ws_capture_t ws_capture_t;
 
 enum { WS_CAPTURE_SEQUENTIAL = 1 };
 /**
  * \param path to file to open
  * \param flags must be zero
+ * \param [out] err integer to store error code to or NULL
+ * \param [out] err_info pointer to store error string to or NULL. must be freed with g_free
  * \returns a handle identifying the capture or NULL on failure
  *
  * \brief Opens a packet capture file (*.pcap)
  */
-ws_capture_t *ws_capture_open_offline(const char *path, int flags);
+ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, char **err_info);
 
 /**
- * \param interface name retrieved with \sa capture_list_interfaces
+ * \param interface name retrieved with \sa ws_capture_list_interfaces
  * \param flags must be zero
+ * \param [out] err integer to store error code to or NULL
+ * \param [out] err_info pointer to store error string to or NULL. must be freed with g_free
  * \returns a handle identifying the capture
  *
  * \brief Starts sniffing on a network interface or NULL on failure
  */
-ws_capture_t *ws_capture_open_live(const char *interface, int flags);
+ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, char **err_info);
 
-/*** container for information about an interface */
-struct ws_capture_interface {
-    /** A pointer to the next entry */
-    struct ws_capture_interface *next;
-    /** the interface name as a string, e.g. eth0 */
-    const char *interface;
-    /** a description of the interface */
-    const char *description;
-
-    struct ws_capture_addr{
-        /** a pointer to the next entry */
-        struct ws_capture_addr *next;
-        /** The interface's address */
-        struct sockaddr *addr;
-        /** The netmask of the interface */
-        struct sockaddr *netmask;
-        /** The broadcast address of the interface */
-        struct sockaddr *broadcast_addr;
-        /** The destination address if applicable */
-        struct sockaddr *dst_addr;
-    } addrs;
-
-    struct {
-        /** is it a loopback interface? */
-        unsigned loopback :1;
-    } flags;
-};
 /**
  * \param [out] head a pointer by reference
  * \returns the number of interfaces, negative error code otherwise
@@ -68,25 +47,10 @@ struct ws_capture_interface {
  * \brief Populates the pointer argument with a singly linked list
  * of interfaces which can be sniffed
  */
-int ws_capture_list_interfaces(struct ws_capture_interface **head);
+GList *ws_capture_list_interfaces(int *err, char **err_info);
 
 /**
- * \param [in] inteface pointer acquired by \sa capture_list_interfaces
- * 
- * \brief free the space utilized by the \sa struct capture_interface list
- */
-void ws_capture_free_interfaces(struct ws_capture_interface *interface);
-
-/**
- * \param capture a valid \sa capture_t instance
- * \returns string to error or NULL
- *
- * \brief returns string representation of last error, NULL otherwise
- */
-const char *ws_capture_error(ws_capture_t *capture);
-
-/**
- * \param capture valid \sa capture_t instance
+ * \param capture valid \sa ws_capture_t instance
  *
  * \brief closes capture
  */

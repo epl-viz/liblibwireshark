@@ -10,15 +10,14 @@
 #include <epan/proto.h>
 #include <epan/ftypes/ftypes.h>
 #include <epan/asm_utils.h>
+
+#include <caputils/capture_ifinfo.h>
+
 #include <wsutil/privileges.h>
 #include <wsutil/plugins.h>
 #include <wiretap/wtap.h>
 
 #include "ws_capture-internal.h"
-
-#if 0 // error: ‘tshark_get_frame_ts’ defined but not used [-Werror=unused-function]
-static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
-#endif
 
 int ws_capture_init(void) {
     init_process_policies();
@@ -27,21 +26,13 @@ int ws_capture_init(void) {
     register_all_wiretap_modules();
     /*wtap_register_plugin_types(); [> Types known to libwiretap <]*/
 
-
     return 0;
 }
 
-/**
- * \param path to file to open
- * \param flags must be zero
- * \returns a handle identifying the capture or NULL on failure
- *
- * \brief Opens a packet capture file (*.pcap)
- */
-ws_capture_t *ws_capture_open_offline(const char *path, int flags) {
+ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, char **err_info) {
     assert(flags == 0);
-    int err = 0;
-    char *err_info = NULL;
+    int _err = 0;
+    char *_err_info = NULL;
     Buffer buf;
     capture_file cfile;
     cap_file_init(&cfile);
@@ -50,8 +41,9 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags) {
     ws_buffer_init(&buf, 1500);
 
 
-    cfile.wth = wtap_open_offline(cfile.filename, WTAP_TYPE_AUTO, &err, &err_info, TRUE);
+    cfile.wth = wtap_open_offline(cfile.filename, WTAP_TYPE_AUTO, &_err, &_err_info, TRUE);
     if (cfile.wth == NULL) {
+        PROVIDE_ERRORS;
         return NULL;
     }
 
@@ -90,29 +82,24 @@ void ws_capture_close(ws_capture_t *cap) {
     g_free(cap);
 }
 
+ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, char **err_info) {
+    if (interface == NULL)
+        ; /* use default interface */
+    /*PROVIDE_ERRORS;*/
+    return NULL;
+}
+
+GList *ws_capture_list_interfaces(int *err, char **err_info) {
+    int _err = 0;
+    char *_err_info = NULL;
+    /*GList *ifs = capture_interface_list(&_err, &_err_info, NULL);*/
+
+    PROVIDE_ERRORS; 
+
+    return NULL; //ifs;
+}
+
+
 void ws_capture_finalize(void) {
 }
 
-#if 0 // error: ‘tshark_get_frame_ts’ defined but not used [-Werror=unused-function]
-static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
-{
-    capture_file *cf = (capture_file *) data;
-
-    if (cf->ref && cf->ref->num == frame_num)
-        return &(cf->ref->abs_ts);
-
-    if (cf->prev_dis && cf->prev_dis->num == frame_num)
-        return &(cf->prev_dis->abs_ts);
-
-    if (cf->prev_cap && cf->prev_cap->num == frame_num)
-        return &(cf->prev_cap->abs_ts);
-
-    if (cf->frames) {
-        frame_data *fd = frame_data_sequence_find(cf->frames, frame_num);
-
-        return (fd) ? &fd->abs_ts : NULL;
-    }
-
-    return NULL;
-}
-#endif

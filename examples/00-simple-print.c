@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     ws_capture_init();
     // TODO: better diagnostics
-    ws_capture_t *cap = ws_capture_open_offline(filename, 0);
+    ws_capture_t *cap = ws_capture_open_offline(filename, 0, NULL, NULL);
     assert(cap);
 
     ws_dissect_init();
@@ -91,7 +91,7 @@ static void visit(proto_tree *node, gpointer data) {
 
 static void print_each_packet_manual(ws_dissect_t *handle) {
     struct ws_dissection packet;
-    while (ws_dissect_next(handle, &packet)) {
+    while (ws_dissect_next(handle, &packet, NULL, NULL)) {
         proto_tree_children_foreach(packet.edt->tree, visit, NULL);
         puts("\n===================");
     }
@@ -101,7 +101,7 @@ static void print_each_packet_manual(ws_dissect_t *handle) {
 static void print_each_packet_text(ws_dissect_t *handle) {
     struct ws_dissection packet;
 
-    while (ws_dissect_next(handle, &packet)) {
+    while (ws_dissect_next(handle, &packet, NULL, NULL)) {
         char *buf = NULL;
         ws_dissect_tostr(&packet, &buf);
         puts(buf);

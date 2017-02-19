@@ -15,5 +15,15 @@ struct ws_capture_t {
 #endif
 };
 
+#define PROVIDE_ERRORS \
+    do { \
+        if (err) \
+            *err = _err; \
+        if (err_info) \
+            *err_info = _err_info; \
+        else \
+            g_free(_err_info); \
+    } while(0)
+
 
 #endif

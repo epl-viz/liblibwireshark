@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
     ws_capture_init();
     // TODO: better diagnostics
-    ws_capture_t *cap = ws_capture_open_offline(filename, 0);
+    ws_capture_t *cap = ws_capture_open_offline(filename, 0, NULL, NULL);
     assert(cap);
 
     ws_dissect_init();
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     char timestamp[WS_ISO8601_LEN];
     struct ws_dissection packet;
-    while (ws_dissect_next(dissector, &packet)) {
+    while (ws_dissect_next(dissector, &packet, NULL, NULL)) {
         ws_nstime_tostr(timestamp, 6, &packet.timestamp);
 
         printf("%s %s\n", timestamp, packet.edt->tree->first_child->finfo->rep->representation);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     char buf[32];
     printf("Seek to frame: ");
-// FIXME: some init function closes standard input
+    // FIXME: some init function closes standard input
     freopen("/dev/tty", "r", stdin);
 
     while (fgets(buf, sizeof buf, stdin)) {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         if ((1 <= framenum && framenum <= frames->len) && endptr != buf) {
             struct ws_dissection packet;
             int64_t offset = g_array_index(frames, int64_t, framenum);
-            if (ws_dissect_seek(dissector, &packet, offset)) {
+            if (ws_dissect_seek(dissector, &packet, offset, NULL, NULL)) {
                 char *buf = NULL;
                 ws_dissect_tostr(&packet, &buf);
                 puts(buf);

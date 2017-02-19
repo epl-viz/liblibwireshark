@@ -14,13 +14,11 @@
 #include "ws_capture-internal.h"
 
 
-/*** Opaque handle for dissections */
 struct ws_dissect_t {
     ws_capture_t *cap;
     epan_dissect_t *edt;
 };
 
-/*** Initializes dissection capability */
 int ws_dissect_init(void) {
     epan_register_plugin_types(); /* Types known to libwireshark */
     scan_plugins(/*REPORT_LOAD_FAILURE*/);
@@ -42,10 +40,6 @@ void ws_dissect_finalize(void) {
 
 static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
 
-/**
- * \param capture to dissect packets from
- * \returns handle for ws_dissect_* operations
- */
 ws_dissect_t *ws_dissect_capture(ws_capture_t *capture) {
     epan_free(capture->cfile.epan);
     capture->cfile.epan = epan_new();
@@ -58,17 +52,11 @@ ws_dissect_t *ws_dissect_capture(ws_capture_t *capture) {
     return handle;
 }
 
-/**
- * \param [in]  src The dissector to operate on
- * \param [out] dst A pointer to a valid struct dissection
- * \returns a negative error code at failure
- *
- * \brief Dissects the next packet in order
- */
-int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
+gboolean ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst, int *err, char **err_info) {
     assert(src);
-    int err = 0;
-    char *err_info = NULL;
+    int _err = 0;
+    char *_err_info = NULL;
+
     static guint32 cum_bytes = 0;
     static gint64 data_offset = 0;
     capture_file *cfile = &src->cap->cfile;
@@ -83,9 +71,10 @@ int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
     // dissect anew
     src->edt = epan_dissect_new(cfile->epan, TRUE, TRUE);
 
-    if (!wtap_read(cfile->wth, &err, &err_info, &data_offset)) {
+    if (!wtap_read(cfile->wth, &_err, &_err_info, &data_offset)) {
         /* reached end */
-        return 0;
+        PROVIDE_ERRORS;
+        return FALSE;
     }
     cfile->count++;
 
@@ -111,19 +100,12 @@ int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
     dst->timestamp = fdlocal.abs_ts;
 
     frame_data_destroy(&fdlocal);
-    return 1;
+    return TRUE;
 }
 
-/**
- * \param dissector The dissector handle
- * \param cycle_num cycle number to seek to
- *
- * \brief Seeks to a specific poisition in the capture handle
- *        May dissect preceeding packets in order to establish cycle bondaries
- */
-int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_offset /*, int whence*/) {
-    int err = 0;
-    char *err_info = NULL;
+gboolean ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_offset, int *err, char **err_info) {
+    int _err = 0;
+    char *_err_info = NULL;
 
     static guint32 cum_bytes = 0;
     capture_file *cfile = &src->cap->cfile;
@@ -136,10 +118,11 @@ int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_o
     src->edt = NULL; // XXX remove dependency on src->edt
     edt = epan_dissect_new(cfile->epan, TRUE, TRUE);
 
-    if (!wtap_seek_read(cfile->wth, data_offset, &phdr, buf, &err, &err_info)) {
-        return 0;
+    if (!wtap_seek_read(cfile->wth, data_offset, &phdr, buf, &_err, &_err_info)) {
+        PROVIDE_ERRORS;
+        return FALSE;
     }
-    /*if (!wtap_read(cfile->wth, &err, &err_info, &data_offset)) {*/
+
     cfile->count++;
 
     frame_data fdlocal;
@@ -163,9 +146,9 @@ int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_o
     dst->timestamp = fdlocal.abs_ts;
 
     frame_data_destroy(&fdlocal);
-    return 1;
+    return TRUE;
 }
-int ws_dissect_tostr(struct ws_dissection *dissection, char **buf) {
+char *ws_dissect_tostr(struct ws_dissection *dissection, char **buf) {
     assert(buf);
     assert(*buf == NULL);
     print_args_t    print_args   = {0};
@@ -180,13 +163,9 @@ int ws_dissect_tostr(struct ws_dissection *dissection, char **buf) {
     *buf = g_string_free(gstr, FALSE);
 
     destroy_print_stream(print_stream);
-    return 0;
+    return *buf;
 }
-/**
- * \param handle dissector handle
- *
- * \brief Frees the dissector. The capture file remain open though
- */
+
 void ws_dissect_free(ws_dissect_t *handle) {
     epan_free(handle->cap->cfile.epan);
     if (handle->edt)
