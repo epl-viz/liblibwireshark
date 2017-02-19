@@ -9,6 +9,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "defs.h"
+
 enum print_type {
     PRINT_MANUAL,
     PRINT_TEXT,
@@ -53,11 +55,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    int err_code;
+    char *err_info;
 
     ws_capture_init();
-    // TODO: better diagnostics
-    ws_capture_t *cap = ws_capture_open_offline(filename, 0, NULL, NULL);
-    assert(cap);
+    ws_capture_t *cap = ws_capture_open_offline(filename, 0, &err_code, &err_info);
+    my_assert(cap, "Error %d: %s\n", err_code, err_info);
 
     ws_dissect_init();
     ws_dissect_t *dissector = ws_dissect_capture(cap);

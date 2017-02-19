@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
+#include "defs.h"
 
 
 static void print_usage(char *argv[]) {
@@ -19,6 +20,8 @@ static void print_usage(char *argv[]) {
 
 int main(int argc, char *argv[]) {
     char *filename   = NULL;
+    int err_code;
+    char *err_info;
     
     if (argc != 2) {
         print_usage(argv);
@@ -32,9 +35,8 @@ int main(int argc, char *argv[]) {
     }
 
     ws_capture_init();
-    // TODO: better diagnostics
-    ws_capture_t *cap = ws_capture_open_offline(filename, 0, NULL, NULL);
-    assert(cap);
+    ws_capture_t *cap = ws_capture_open_offline(filename, 0, &err_code, &err_info);
+    my_assert(cap, "Error %d: %s\n", err_code, err_info);
 
     ws_dissect_init();
     ws_dissect_t *dissector = ws_dissect_capture(cap);
@@ -45,16 +47,18 @@ int main(int argc, char *argv[]) {
 
     char timestamp[WS_ISO8601_LEN];
     struct ws_dissection packet;
-    while (ws_dissect_next(dissector, &packet, NULL, NULL)) {
-        ws_nstime_tostr(timestamp, 9, &packet.timestamp);
+    while (ws_dissect_next(dissector, &packet, &err_code, &err_info)) {
+        ws_nstime_tostr(timestamp, 6, &packet.timestamp);
 
         printf("%s %s\n", timestamp, packet.edt->tree->first_child->finfo->rep->representation);
         g_array_append_val(frames, packet.offset);
     }
+    /* Did we exit due to EOF and not some error? */
+    my_assert(!err_code, "Error %d: %s\n", err_code, err_info);
 
     char buf[32];
     printf("Seek to frame: ");
-// FIXME: some init function closes standard input
+    // FIXME: some init function closes standard input
     freopen("/dev/tty", "r", stdin);
 
     while (fgets(buf, sizeof buf, stdin)) {
@@ -68,12 +72,12 @@ int main(int argc, char *argv[]) {
                 ws_dissect_tostr(&packet, &buf);
                 puts(buf);
             } else {
-                fprintf(stderr, "Seeking to frame %lu (offset=%" PRId64 ") failed\n",
-                        framenum, offset);
+                fprintf(stderr, "Seeking to frame %lu (offset=%" PRId64 ") failed with code=%d (%s)\n",
+                        framenum, offset, err_code, err_info);
             }
             printf("%lld\n", offset);
         } else {
-            fprintf(stderr, "Invalid frame number (must be in [1, %u]\n", frames->len);
+            fprintf(stderr, "Invalid frame number (must be in [1, %u]\n", frames->len - 1);
         }
         printf("Seek to: ");
     }
