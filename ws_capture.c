@@ -62,7 +62,7 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, cha
 void ws_capture_close(ws_capture_t *cap) {
     if (!cap) return;
     if (cap->cfile.frames) {
-        // FIXME: leaks memory
+        // FIXME: crashes in some instances, for now it only leaks memory
         /*free_frame_data_sequence(cap->cfile.frames);*/
         cap->cfile.frames = NULL;
     }

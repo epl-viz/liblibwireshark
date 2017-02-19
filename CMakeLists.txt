@@ -93,8 +93,13 @@ if( ENABLE_EXAMPLES )
   add_executable(seek_online ${seek_online_src})
   target_compile_options(seek_online PUBLIC ${GLIB_CFLAGS_OTHER})
   target_link_libraries(seek_online ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  #4
+  file(GLOB multiple_print_src examples/04-open-multiple-files.c)
+  add_executable(multiple_print ${multiple_print_src})
+  target_compile_options(multiple_print PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(multiple_print ${PROJECT_NAME} ${GLIB_LIBRARIES})
 
-  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online )
+  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print )
 
 endif( ENABLE_EXAMPLES )
 
