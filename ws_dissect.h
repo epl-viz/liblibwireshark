@@ -10,6 +10,24 @@ extern "C" {
 #include <epan/epan.h>
 #include <epan/epan_dissect.h>
 #include <epan/print.h>
+#include <glib.h>
+#include <time.h>
+#include <string.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#define gmtime_r(ptime,ptm) (gmtime_s((ptm),(ptime)), (ptm))
+#else
+#include <sys/time.h>
+#endif
+
+#if defined(__STDC__) && __STDC_VERSION__ >= 199901L
+#define WS_IF_C99(x) x
+#else
+#define WS_IF_C99(x)
+#endif
 
 
 /*** Opaque handle for dissections */
@@ -47,6 +65,9 @@ ws_dissect_t *ws_dissect_capture(ws_capture_t *capture);
 struct ws_dissection {
     /** offset of packet in file **/
     int64_t offset;
+
+    /** time **/
+    nstime_t timestamp;
     
     /** profiles in use for this packet */
     struct profile_vec *profiles;
@@ -64,6 +85,10 @@ struct ws_dissection {
  * \brief Dissects the next packet in order
  */
 int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst);
+
+#define WS_ISO8601_LEN (sizeof "1970-01-01T23:59:59.123456789Z")
+char *ws_nstime_tostr(char iso8601[WS_IF_C99(restrict static) WS_ISO8601_LEN], unsigned precision, const nstime_t * WS_IF_C99(restrict) nst);
+
 
 /**
  * \param   dissector The dissector handle

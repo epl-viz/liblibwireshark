@@ -108,6 +108,7 @@ int ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst) {
     assert(dst);
     dst->edt = src->edt;
     dst->offset = data_offset;
+    dst->timestamp = fdlocal.abs_ts;
 
     frame_data_destroy(&fdlocal);
     return 1;
@@ -158,6 +159,8 @@ int ws_dissect_seek(ws_dissect_t *src, struct ws_dissection *dst, int64_t data_o
 
     assert(dst);
     dst->edt = edt;
+    dst->offset = data_offset;
+    dst->timestamp = fdlocal.abs_ts;
 
     frame_data_destroy(&fdlocal);
     return 1;
@@ -190,6 +193,25 @@ void ws_dissect_free(ws_dissect_t *handle) {
         epan_dissect_free(handle->edt);
     g_free(handle);
 }
+
+char *ws_nstime_tostr(char iso8601[restrict static WS_ISO8601_LEN], unsigned precision, const nstime_t * restrict nst) {
+    struct tm tm;
+    if (!gmtime_r(&nst->secs, &tm))
+        return memcpy(iso8601, "Error: Year overflow", sizeof "Error: Year overflow");
+
+    tm.tm_year %= 10*1000*1000;
+    char *frac = iso8601 + strftime(iso8601, sizeof "1970-01-01T23:59:59.", "%Y-%m-%dT%H:%M:%SZ", &tm);
+
+    if (precision) {
+        unsigned long nsecs = nst->nsecs;
+        for (int i = precision; i < 9; i++) nsecs /= 10;
+        char *spaces = frac + sprintf(frac - 1, ".%-*luZ", precision, nsecs) - 3;
+        if (spaces > frac) while (*spaces == ' ') *spaces-- = '0';
+    }
+
+    return iso8601;
+}
+
 
 static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
 {

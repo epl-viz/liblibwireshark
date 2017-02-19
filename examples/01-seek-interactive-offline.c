@@ -11,7 +11,8 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-static void visit(proto_tree *node, gpointer data);
+
+
 static void print_usage(char *argv[]) {
     printf("Usage: %s <input_file>\n", argv[0]);
 }
@@ -42,9 +43,12 @@ int main(int argc, char *argv[]) {
     GArray *frames = g_array_new(FALSE, FALSE, sizeof(int64_t));
     g_array_append_val(frames, (int64_t){0});
 
+    char timestamp[WS_ISO8601_LEN];
     struct ws_dissection packet;
     while (ws_dissect_next(dissector, &packet)) {
-        visit(packet.edt->tree->first_child, NULL);
+        ws_nstime_tostr(timestamp, 6, &packet.timestamp);
+
+        printf("%s %s\n", timestamp, packet.edt->tree->first_child->finfo->rep->representation);
         g_array_append_val(frames, packet.offset);
     }
 
@@ -67,8 +71,9 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Seeking to frame %lu (offset=%" PRId64 ") failed\n",
                         framenum, offset);
             }
+            printf("%lld\n", offset);
         } else {
-            fprintf(stderr, "Invalid frame number (must be in [1, %u]\n", frames->len);
+            fprintf(stderr, "Invalid frame number (must be in [1, %u]\n", frames->len - 1);
         }
         printf("Seek to: ");
     }
@@ -81,15 +86,5 @@ int main(int argc, char *argv[]) {
     ws_dissect_finalize();
     ws_capture_finalize();
     return 0;
-}
-
-static void visit(proto_tree *node, gpointer data) {
-    field_info *fi = PNODE_FINFO(node);
-    if (!fi || !fi->rep)
-        return;
-
-    printf("%s\n", node->finfo->rep->representation);
-
-    g_assert((fi->tree_type >= -1) && (fi->tree_type < num_tree_types));
 }
 
