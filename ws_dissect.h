@@ -33,11 +33,31 @@ extern "C" {
 /*** Opaque handle for dissections */
 typedef struct ws_dissect_t ws_dissect_t;
 
+/**
+ * \param dir new plugin directory
+ * \returns TRUE if setting environment variable succeeded, FALSE otherwise
+ *
+ * \brief Globally set a directory to load plugins from
+ * \note This is only effective if called _before_ \sa ws_dissect_init
+ * \note Call this before starting _any_ threads, lest demons fly out of noses
+ * \note Plugins have priority over built-in dissectors this way, so no need to disable
+ */
+gboolean ws_dissect_plugin_dir(const char *dir);
+
 /*** Initializes dissection capability */
 int ws_dissect_init(void);
 
 /*** cleans up dissection capability */
 void ws_dissect_finalize(void);
+
+/**
+ * \param name name of dissector
+ *
+ * \brief Globally Disable a dissector by name.
+ * \note Must be called _after_ \sa ws_dissect_init
+ */
+void ws_dissect_proto_disable(const char *name);
+
 
 /**
  * \param capture to dissect packets from

@@ -11,33 +11,25 @@
 
 #include "defs.h"
 
-enum print_type {
-    PRINT_MANUAL,
-    PRINT_TEXT,
-};
-
 static void print_each_packet_text(ws_dissect_t *handle);
-static void print_each_packet_manual(ws_dissect_t *handle);
 
 static void print_usage(char *argv[]) {
-    printf("Usage: [-t <manual|text> (default text)] %s <input_file>\n", argv[0]);
+    printf("Usage: %s -p <plugin_dir> -d <dissector_to_disable> <input_file>\n", argv[0]);
 }
 
 int main(int argc, char *argv[]) {
     char *          filename   = NULL;
-    enum print_type print_type = PRINT_TEXT;
     int             opt;
+    GArray *disabled = g_array_new(FALSE, FALSE, sizeof(const char *));
 
-
-    while ((opt = getopt(argc, argv, "t:")) != -1) {
+    while ((opt = getopt(argc, argv, "p:d:")) != -1) {
         switch (opt) {
-            case 't':
-                      if (strcmp(optarg, "manual") == 0) {
-                          print_type = PRINT_MANUAL;
-                      } else if (strcmp(optarg, "text") == 0) {
-                          print_type = PRINT_TEXT;
-                      }
-                      break;
+            case 'p':
+                assert(ws_dissect_plugin_dir(optarg));
+                break;
+            case 'd':
+                g_array_append_val(disabled, optarg);
+                break;
             default: print_usage(argv); return 1;
         }
     }
@@ -49,28 +41,33 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    filename = strdup(argv[optind]);
+    filename = g_strdup(argv[optind]);
 
     if (access(filename, F_OK) == -1) {
         fprintf(stderr, "File '%s' doesn't exist.\n", filename);
         return 1;
     }
 
+    ws_capture_init();
+    ws_dissect_init();
+
+    for (int i = 0; i < disabled->len; i++) {
+        const char *dissector = g_array_index(disabled, const char *, i);
+        ws_dissect_proto_disable(dissector);
+    }
+
+
+
     int err_code;
     char *err_info;
 
-    ws_capture_init();
     ws_capture_t *cap = ws_capture_open_offline(filename, 0, &err_code, &err_info);
     my_assert(cap, "Error %d: %s\n", err_code, err_info);
 
-    ws_dissect_init();
     ws_dissect_t *dissector = ws_dissect_capture(cap);
     assert(dissector);
 
-    switch (print_type) {
-        case PRINT_MANUAL: print_each_packet_manual(dissector); break;
-        case PRINT_TEXT: print_each_packet_text(dissector); break;
-    }
+    print_each_packet_text(dissector);
 
     ws_dissect_free(dissector);
     ws_capture_close(cap);

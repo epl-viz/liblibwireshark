@@ -47,7 +47,7 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, c
  * \brief Populates the pointer argument with a singly linked list
  * of interfaces which can be sniffed
  */
-GList *ws_capture_list_interfaces(int *err, char **err_info);
+GList *ws_capture_interface_list(int *err, char **err_info);
 
 /**
  * \param capture valid \sa ws_capture_t instance

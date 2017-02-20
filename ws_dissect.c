@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include <glib.h>
 
 #include "ws_capture-internal.h"
 
@@ -19,6 +20,17 @@ struct ws_dissect_t {
     epan_dissect_t *edt;
 };
 
+void ws_dissect_proto_disable(const char *string) {
+    proto_disable_proto_by_name(string);
+}
+
+gboolean ws_dissect_plugin_dir(const char *dir) {
+    gboolean status;
+    status = g_setenv("WIRESHARK_PLUGIN_DIR", dir, FALSE);
+
+    return status;
+}
+
 int ws_dissect_init(void) {
     epan_register_plugin_types(); /* Types known to libwireshark */
     scan_plugins(/*REPORT_LOAD_FAILURE*/);
@@ -27,7 +39,6 @@ int ws_dissect_init(void) {
         return 2;
     }
 
-    /*proto_disable_proto_by_name("tcp");*/
     /*set_disabled_protos_list();*/
     proto_initialize_all_prefixes();
 

@@ -19,12 +19,23 @@
 
 #include "ws_capture-internal.h"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+static WSADATA wsaData;
+#endif /* _WIN32 */
+
 int ws_capture_init(void) {
     init_process_policies();
     wtap_init();
     /* Register all libwiretap plugin modules. */
     register_all_wiretap_modules();
     /*wtap_register_plugin_types(); [> Types known to libwiretap <]*/
+
+#ifdef _WIN32
+    /* Start windows sockets */
+    WSAStartup( MAKEWORD( 1, 1 ), &wsaData );
+#endif /* _WIN32 */
 
     return 0;
 }
@@ -89,17 +100,27 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, c
     return NULL;
 }
 
-GList *ws_capture_list_interfaces(int *err, char **err_info) {
+GList *ws_capture_interface_list(int *err, char **err_info) {
     int _err = 0;
     char *_err_info = NULL;
+    /*
+     * XXX capchild isn't member of libwireshark
+     * I could use pcap_findalldevs to implement this though.
+     * hmm...
+     */
     /*GList *ifs = capture_interface_list(&_err, &_err_info, NULL);*/
 
     PROVIDE_ERRORS; 
 
-    return NULL; //ifs;
+    /*return ifs;*/
+    return NULL; // TODO: implement this
 }
 
 
 void ws_capture_finalize(void) {
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
 }
 
