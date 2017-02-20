@@ -94,9 +94,15 @@ void ws_capture_close(ws_capture_t *cap) {
 }
 
 ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, char **err_info) {
+    assert(interface == NULL);
+    assert(flags == 0);
+    assert(err == NULL);
+    assert(err_info == 0)
+#if 0
     if (interface == NULL)
         ; /* use default interface */
     /*PROVIDE_ERRORS;*/
+#endif
     return NULL;
 }
 
