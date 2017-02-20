@@ -97,7 +97,7 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, c
     assert(interface == NULL);
     assert(flags == 0);
     assert(err == NULL);
-    assert(err_info == 0)
+    assert(err_info == 0);
 #if 0
     if (interface == NULL)
         ; /* use default interface */
@@ -116,7 +116,7 @@ GList *ws_capture_interface_list(int *err, char **err_info) {
      */
     /*GList *ifs = capture_interface_list(&_err, &_err_info, NULL);*/
 
-    PROVIDE_ERRORS; 
+    PROVIDE_ERRORS;
 
     /*return ifs;*/
     return NULL; // TODO: implement this
