@@ -72,7 +72,7 @@ set_target_properties(
 
 add_definitions(-DWS_NORETURN=_Noreturn)
 
-target_link_libraries(${PROJECT_NAME} ${Wireshark_LIBRARY} wiretap wsutil ${GLIB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${Wireshark_LIBRARY} wiretap wsutil capchild ${GLIB_LIBRARIES})
 
 if( ENABLE_EXAMPLES )
 
