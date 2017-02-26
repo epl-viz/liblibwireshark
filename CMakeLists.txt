@@ -36,6 +36,11 @@ include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS} )
 include_directories(        ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include )
 link_directories( ${Wireshark_LIB_DIR} )
 
+IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/private.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/private.cmake)
+ENDIF()
+
+
 set(CMAKE_MACOSX_RPATH 1)
 
 
@@ -131,6 +136,3 @@ install(
   DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
-IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/private.cmake)
-    include(${CMAKE_CURRENT_LIST_DIR}/private.cmake)
-ENDIF()
