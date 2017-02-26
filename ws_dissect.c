@@ -6,6 +6,7 @@
 #include <epan/epan_dissect.h>
 #include <epan/epan-int.h>
 #include <wsutil/nstime.h>
+#include <wsutil/privileges.h>
 #include <frame_tvbuff.h>
 #include <assert.h>
 #include <stdio.h>
@@ -24,11 +25,16 @@ void ws_dissect_proto_disable(const char *string) {
     proto_disable_proto_by_name(string);
 }
 
-gboolean ws_dissect_plugin_dir(const char *dir) {
-    gboolean status;
-    status = g_setenv("WIRESHARK_PLUGIN_DIR", dir, FALSE);
+static gboolean dissect_initialized = FALSE;
 
-    return status;
+gboolean ws_dissect_plugin_dir(const char *dir) {
+    if (dissect_initialized)
+        return FALSE;
+    init_process_policies();
+    if (started_with_special_privs() ||  running_with_special_privs())
+        return FALSE;
+
+    return g_setenv("WIRESHARK_PLUGIN_DIR", dir, FALSE);
 }
 
 int ws_dissect_init(void) {
@@ -40,13 +46,16 @@ int ws_dissect_init(void) {
     }
 
     /*set_disabled_protos_list();*/
+    // TODO: this one here closes stdin for whatever reason, y tho?
     proto_initialize_all_prefixes();
 
 
+    dissect_initialized = TRUE;
     return 0;
 }
 void ws_dissect_finalize(void) {
     epan_cleanup();
+    dissect_initialized = FALSE;
 }
 
 static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);

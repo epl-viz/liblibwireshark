@@ -77,27 +77,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static void visit(proto_tree *node, gpointer data) {
-    field_info *fi = PNODE_FINFO(node);
-    if (!fi || !fi->rep)
-        return;
-
-    printf("***\t%s\n", node->finfo->rep->representation);
-
-    g_assert((fi->tree_type >= -1) && (fi->tree_type < num_tree_types));
-    if (node->first_child != NULL) {
-        proto_tree_children_foreach(node, visit, data);
-    }
-}
-
-static void print_each_packet_manual(ws_dissect_t *handle) {
-    struct ws_dissection packet;
-    while (ws_dissect_next(handle, &packet, NULL, NULL)) {
-        proto_tree_children_foreach(packet.edt->tree, visit, NULL);
-        puts("\n===================");
-    }
-}
-
 
 static void print_each_packet_text(ws_dissect_t *handle) {
     struct ws_dissection packet;

@@ -35,10 +35,13 @@ typedef struct ws_dissect_t ws_dissect_t;
 
 /**
  * \param dir new plugin directory
- * \returns TRUE if setting environment variable succeeded, FALSE otherwise
+ * \returns TRUE on success, FALSE on failure
  *
- * \brief Globally set a directory to load plugins from
- * \note This is only effective if called _before_ \sa ws_dissect_init
+ * \brief Globally set a directory to load plugins from.
+ *        This is achieved quite crudely by setting an environment variable
+ *        This function may fail if setting the environment variable failed,
+ *        if it was executed before dropping root privileges,
+ *        or \sa ws_dissect_init was already called.
  * \note Call this before starting _any_ threads, lest demons fly out of noses
  * \note Plugins have priority over built-in dissectors this way, so no need to disable
  */
