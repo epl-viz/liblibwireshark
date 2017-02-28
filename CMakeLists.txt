@@ -108,8 +108,14 @@ if( ENABLE_EXAMPLES )
   add_executable(load_plugin ${load_plugin_src})
   target_compile_options(load_plugin PUBLIC ${GLIB_CFLAGS_OTHER})
   target_link_libraries(load_plugin ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  #7
+  file(GLOB file_types_src examples/07-file-types.c)
+  add_executable(file_types ${file_types_src})
+  target_compile_options(file_types PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(file_types ${PROJECT_NAME} ${GLIB_LIBRARIES})
 
-  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin )
+  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin 
+      file_types )
 
 endif( ENABLE_EXAMPLES )
 
