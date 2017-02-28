@@ -48,8 +48,14 @@ int ws_dissect_init(void) {
     /*set_disabled_protos_list();*/
     // TODO: this one here closes stdin for whatever reason, y tho?
     proto_initialize_all_prefixes();
-
-
+    //FIXME: do this properly
+#if _WIN32
+#else
+    freopen("/dev/tty", "r", stdin);
+#endif
+    
+    
+    
     dissect_initialized = TRUE;
     return 0;
 }
