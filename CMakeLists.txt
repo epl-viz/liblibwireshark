@@ -118,6 +118,11 @@ if( ENABLE_EXAMPLES )
   add_executable(file_types ${file_types_src})
   target_compile_options(file_types PUBLIC ${GLIB_CFLAGS_OTHER})
   target_link_libraries(file_types ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  #8
+  file(GLOB uat_src examples/08-use-uat.c)
+  add_executable(uat ${uat_src})
+  target_compile_options(uat PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(uat ${PROJECT_NAME} ${GLIB_LIBRARIES})
 
   set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin 
       stdin_open
