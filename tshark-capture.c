@@ -392,8 +392,8 @@ cf_open_error_message(int err, gchar *err_info, gboolean for_writing,
                 errmsg = errmsg_errno;
                 break;
         }
-    } else
-        ;
+    } else {}
+
     //FIXME
     /*errmsg = file_open_error_message(err, for_writing);*/
     return errmsg;
@@ -587,6 +587,8 @@ pipe_input_set_handler(gint source, gpointer user_data, ws_process_id *child_pro
 process_packet(capture_file *cf, epan_dissect_t *edt, gint64 offset, struct wtap_pkthdr *whdr,
         const guchar *pd, guint tap_flags)
 {
+    (void)tap_flags;
+    (void)cf;
     frame_data      fdata;
     column_info    *cinfo;
     gboolean        passed;
@@ -702,6 +704,9 @@ process_packet(capture_file *cf, epan_dissect_t *edt, gint64 offset, struct wtap
     return passed;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
     static gboolean
 process_packet_first_pass(capture_file *cf, epan_dissect_t *edt,
         gint64 offset, struct wtap_pkthdr *whdr,
@@ -784,9 +789,12 @@ process_packet_first_pass(capture_file *cf, epan_dissect_t *edt,
     return passed;
 }
 
+#pragma GCC diagnostic pop
+
     static gboolean
 print_packet(capture_file *cf, epan_dissect_t *edt)
 {
+    (void)cf;
 
 #if 0
     if (print_summary || output_fields_has_cols(output_fields)) {

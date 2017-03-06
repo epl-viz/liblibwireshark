@@ -1042,6 +1042,7 @@ capture_opts_default_iface_if_necessary(capture_options *capture_opts,
 static int
 capture_opts_test_for_fifo(const char *path)
 {
+  (void)path;
     //FIXME
 #if 0
     ws_statb64 statb;

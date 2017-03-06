@@ -20,7 +20,7 @@ if(MSVC)
   endif()
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
   # Update if necessary
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pedantic -std=gnu11 -fPIC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -std=gnu11 -fPIC")
 endif()
 
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
@@ -172,7 +172,7 @@ if( ENABLE_EXAMPLES )
   target_compile_options(online PUBLIC ${GLIB_CFLAGS_OTHER})
   target_link_libraries(online ${PROJECT_NAME} ${GLIB_LIBRARIES})
 
-  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin 
+  set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin
       stdin_open
       file_types )
 
