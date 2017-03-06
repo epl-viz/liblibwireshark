@@ -14,12 +14,9 @@
 #include <glib.h>
 
 #include "ws_capture-internal.h"
+#include "ws_dissect-internal.h"
 
-
-struct ws_dissect_t {
-    ws_capture_t *cap;
-    epan_dissect_t *edt;
-};
+#include "ws_dissect.h"
 
 void ws_dissect_proto_disable(const char *string) {
     proto_disable_proto_by_name(string);
@@ -64,7 +61,7 @@ void ws_dissect_finalize(void) {
     dissect_initialized = FALSE;
 }
 
-static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
+const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
 
 ws_dissect_t *ws_dissect_capture(ws_capture_t *capture) {
     epan_free(capture->cfile.epan);
@@ -86,10 +83,22 @@ gboolean ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst, int *err,
     static guint32 cum_bytes = 0;
     static gint64 data_offset = 0;
     capture_file *cfile = &src->cap->cfile;
-    struct wtap_pkthdr *whdr = wtap_phdr(cfile->wth);
-    unsigned char      *buf = wtap_buf_ptr(cfile->wth);
     static frame_data ref_frame;
 
+    if (src->cap->is_live /* && !NON_BLOCKING */) {
+        ws_capture_await_data(src->cap);
+        assert(cfile->wth);
+        wtap_cleareof(cfile->wth);
+    }
+    if (!src->cap->is_wtap_open) {
+        _err = -1;
+        _err_info = g_strdup("WTAP file not open yet");
+        PROVIDE_ERRORS;
+        return FALSE;
+    }
+
+    struct wtap_pkthdr *whdr = wtap_phdr(cfile->wth);
+    unsigned char      *buf = wtap_buf_ptr(cfile->wth);
 
     // clear last dissected buffer
     if (src->edt) epan_dissect_free(src->edt);
@@ -218,7 +227,7 @@ char *ws_nstime_tostr(char iso8601[restrict static WS_ISO8601_LEN], unsigned pre
 }
 
 
-static const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
+const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num)
 {
     capture_file *cf = (capture_file *) data;
 

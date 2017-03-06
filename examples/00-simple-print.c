@@ -20,7 +20,7 @@ static void print_each_packet_text(ws_dissect_t *handle);
 static void print_each_packet_manual(ws_dissect_t *handle);
 
 static void print_usage(char *argv[]) {
-    printf("Usage: [-t <manual|text> (default text)] %s <input_file>\n", argv[0]);
+    printf("Usage: %s [-t <manual|text> (default text)] <input_file>\n", argv[0]);
 }
 
 int main(int argc, char *argv[]) {

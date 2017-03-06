@@ -9,6 +9,7 @@
 #include <epan/disabled_protos.h>
 #include <epan/proto.h>
 #include <epan/ftypes/ftypes.h>
+#include <wsutil/filesystem.h>
 #include <epan/asm_utils.h>
 
 #include <caputils/capture_ifinfo.h>
@@ -37,6 +38,11 @@ int ws_capture_init(void) {
     WSAStartup( MAKEWORD( 1, 1 ), &wsaData );
 #endif /* _WIN32 */
 
+#ifdef WITH_ONLINE_CAPTURE
+    char *progfile = init_progfile_dir(NULL, NULL);
+    (void)progfile;
+#endif
+
     return 0;
 }
 
@@ -58,14 +64,16 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, cha
         return NULL;
     }
 
+
     cfile.count = 0;
     timestamp_set_precision(TS_PREC_AUTO);
 
     cfile.frames = new_frame_data_sequence();
 
-    ws_capture_t *cap = g_malloc(sizeof *cap);
+    ws_capture_t *cap = g_malloc0(sizeof *cap);
     cap->cfile = cfile;
     cap->buf = buf;
+    cap->is_wtap_open = 1;
 
     return cap;
 }
@@ -80,6 +88,8 @@ void ws_capture_close(ws_capture_t *cap) {
     cap->cfile.frames = NULL;
 
     wtap_close(cap->cfile.wth);
+    if (cap->is_live)
+        ws_capture_live_close(cap);
     /*if (cf->is_tempfile) ws_unlink(cf->filename);*/
     g_free(cap->cfile.filename);
 
@@ -93,17 +103,9 @@ void ws_capture_close(ws_capture_t *cap) {
     g_free(cap);
 }
 
-ws_capture_t *ws_capture_open_live(const char *interface, int flags, int *err, char **err_info) {
-    assert(interface == NULL);
-    assert(flags == 0);
-    assert(err == NULL);
-    assert(err_info == 0);
-#if 0
-    if (interface == NULL)
-        ; /* use default interface */
-    /*PROVIDE_ERRORS;*/
-#endif
-    return NULL;
+const char *ws_capture_filename(ws_capture_t *cap)
+{
+    return cap->cfile.filename;
 }
 
 GList *ws_capture_interface_list(int *err, char **err_info) {

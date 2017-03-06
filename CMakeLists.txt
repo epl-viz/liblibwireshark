@@ -28,11 +28,13 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 find_package( Wireshark REQUIRED )
 find_package( PkgConfig REQUIRED )
 pkg_search_module(GLIB REQUIRED glib-2.0)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+find_package( PCAP REQUIRED )
 
 message( STATUS "Wireshark version:     ${Wireshark_VERSION_STRING}" )
 message( STATUS "Wireshark install dir: ${Wireshark_INSTALL_DIR}" )
 
-include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS} )
+include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS} ${PCAP_INCLUDE_DIR})
 include_directories(        ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include )
 link_directories( ${Wireshark_LIB_DIR} )
 
@@ -45,19 +47,44 @@ set(CMAKE_MACOSX_RPATH 1)
 
 
 set(src
-  ${CMAKE_CURRENT_SOURCE_DIR}/frame_tvbuff.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/ws_dissect.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/dissect.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/capture.c
   ${CMAKE_CURRENT_SOURCE_DIR}/print_stream_mem.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/ws_capture.c
+
+  # tshark sources
+  ${CMAKE_CURRENT_SOURCE_DIR}/frame_tvbuff.c
   ${CMAKE_CURRENT_SOURCE_DIR}/cfile.c
 )
 
-set(header
-  ${CMAKE_CURRENT_SOURCE_DIR}/frame_tvbuff.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ws_dissect.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/ws_capture.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/cfile.h
+# FIXME: make this an option
+IF(1)
+    set(src ${src}
+      ${CMAKE_CURRENT_SOURCE_DIR}/online_capture.c
+
+      # tshark sources
+      ${CMAKE_CURRENT_SOURCE_DIR}/tshark-capture.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/extcap.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/extcap_parser.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/extcap_spawn.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/capture_opts.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/filter_files.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/sync_pipe_write.c
+    )
+
+    set(header
+      ${CMAKE_CURRENT_SOURCE_DIR}/frame_tvbuff.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/ws_dissect.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/ws_capture.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/cfile.h
+    )
+ENDIF()
+
+add_definitions(
+    -DHAVE_EXTCAP=1
+    -DHAVE_LIBPCAP=1
+    -DWITH_ONLINE_CAPTURE=1
 )
+
 
 # this is the "object library" target: compiles the sources only once
 add_library(objlib OBJECT ${src} ${header})
@@ -77,7 +104,23 @@ set_target_properties(
 
 add_definitions(-DWS_NORETURN=_Noreturn)
 
-target_link_libraries(${PROJECT_NAME} ${Wireshark_LIBRARY} wiretap wsutil capchild ${GLIB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+    ${Wireshark_LIBRARY}
+    wiretap
+    wsutil
+    capchild
+    ${GLIB_LIBRARIES}
+    caputils
+   ${PCAP_LIBRARY}
+)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(${PROJECT_NAME}
+        "-framework CoreFoundation"
+        "-framework SystemConfiguration"
+    )
+endif()
+
 
 if( ENABLE_EXAMPLES )
 
@@ -123,6 +166,11 @@ if( ENABLE_EXAMPLES )
   add_executable(uat ${uat_src})
   target_compile_options(uat PUBLIC ${GLIB_CFLAGS_OTHER})
   target_link_libraries(uat ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  #9
+  file(GLOB online_src examples/09-online-print.c)
+  add_executable(online ${online_src})
+  target_compile_options(online PUBLIC ${GLIB_CFLAGS_OTHER})
+  target_link_libraries(online ${PROJECT_NAME} ${GLIB_LIBRARIES})
 
   set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin 
       stdin_open

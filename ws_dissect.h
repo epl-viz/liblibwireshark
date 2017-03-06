@@ -1,5 +1,5 @@
-#ifndef LIBLIBWIRESHARK_ws_dissect_H_
-#define LIBLIBWIRESHARK_ws_dissect_H_
+#ifndef LIBLIBWIRESHARK_WS_DISSECT_H_
+#define LIBLIBWIRESHARK_WS_DISSECT_H_
 
 #ifdef __cplusplus
 extern "C" {

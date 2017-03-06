@@ -10,44 +10,49 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <signal.h>
 
 #include "defs.h"
 
+volatile sig_atomic_t exit_loop = 0;
+void sigint(int signo) {
+    (void)signo;
+    exit_loop = 1;
+}
+
 
 static void print_usage(char *argv[]) {
-    printf("Usage: %s <input_file>\n", argv[0]);
+    printf("Usage: %s\n", argv[0]);
 }
 
 int main(int argc, char *argv[]) {
     char *filename   = NULL;
-    int err_code;
+    int err_code = 0;
     char *err_info;
     
-    if (argc != 2) {
+    if (argc != 1) {
         print_usage(argv);
         return 1;
     }
-    filename = argv[1];
 
-    if (access(filename, F_OK) == -1) {
-        fprintf(stderr, "File '%s' doesn't exist.\n", filename);
-        return 2;
-    }
+    signal(SIGINT, sigint);
 
     ws_capture_init();
-    ws_capture_t *cap = ws_capture_open_offline(filename, 0, &err_code, &err_info);
+    ws_dissect_init();
+    ws_capture_t *cap = ws_capture_open_live(NULL, 0, NULL, &err_code, &err_info);
     my_assert(cap, "Error %d: %s\n", err_code, err_info);
 
-    ws_dissect_init();
     ws_dissect_t *dissector = ws_dissect_capture(cap);
     assert(dissector);
 
     GArray *frames = g_array_new(FALSE, FALSE, sizeof(int64_t));
     g_array_append_val(frames, (int64_t){0});
 
+    sleep(3);
+
     char timestamp[WS_ISO8601_LEN];
     struct ws_dissection packet;
-    while (ws_dissect_next(dissector, &packet, &err_code, &err_info)) {
+    while (!exit_loop && ws_dissect_next(dissector, &packet, &err_code, &err_info)) {
         ws_nstime_tostr(timestamp, 6, &packet.timestamp);
 
         printf("%s %s\n", timestamp, packet.edt->tree->first_child->finfo->rep->representation);
