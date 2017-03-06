@@ -37,6 +37,8 @@ flags = [
     'c',
     '-D_REENTRANT',
     '-DLINT',
+    '-DHAVE_LIBPCAP=1',
+    '-DHAVE_EXTCAP=1',
     '-I./include',
     '-I./include/wireshark/wiretap',
     '-I/Users/a3f/pse/Wireshark',

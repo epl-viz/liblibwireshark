@@ -108,23 +108,6 @@ const char *ws_capture_filename(ws_capture_t *cap)
     return cap->cfile.filename;
 }
 
-GList *ws_capture_interface_list(int *err, char **err_info) {
-    int _err = 0;
-    char *_err_info = NULL;
-    /*
-     * XXX capchild isn't member of libwireshark
-     * I could use pcap_findalldevs to implement this though.
-     * hmm...
-     */
-    /*GList *ifs = capture_interface_list(&_err, &_err_info, NULL);*/
-
-    PROVIDE_ERRORS;
-
-    /*return ifs;*/
-    return NULL; // TODO: implement this
-}
-
-
 void ws_capture_finalize(void) {
 
 #ifdef _WIN32
