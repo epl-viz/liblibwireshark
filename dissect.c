@@ -61,15 +61,11 @@ void ws_dissect_finalize(void) {
     dissect_initialized = FALSE;
 }
 
-const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
+epan_t *tshark_epan_new(capture_file *cf);
 
 ws_dissect_t *ws_dissect_capture(ws_capture_t *capture) {
     epan_free(capture->cfile.epan);
-    capture->cfile.epan = epan_new();
-    capture->cfile.epan->data = &capture->cfile;
-
-    capture->cfile.epan->get_frame_ts = tshark_get_frame_ts;
-
+    capture->cfile.epan = tshark_epan_new(&capture->cfile);
     ws_dissect_t *handle = g_malloc0(sizeof *handle);
     handle->cap = capture;
     return handle;
