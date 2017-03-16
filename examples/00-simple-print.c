@@ -67,6 +67,8 @@ int main(int argc, char *argv[]) {
     ws_dissect_t *dissector = ws_dissect_capture(cap);
     assert(dissector);
 
+    printf("Reading file: %s\n", ws_capture_filename(cap));
+
     switch (print_type) {
         case PRINT_MANUAL: print_each_packet_manual(dissector); break;
         case PRINT_TEXT: print_each_packet_text(dissector); break;

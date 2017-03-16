@@ -75,9 +75,6 @@ struct ws_dissection {
     /** time **/
     nstime_t timestamp;
     
-    /** profiles in use for this packet */
-    struct profile_vec *profiles;
-
     /** Wireshark protocol tree */
     epan_dissect_t *edt;
 };

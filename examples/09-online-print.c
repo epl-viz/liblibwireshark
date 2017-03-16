@@ -104,6 +104,8 @@ int main(int argc, char *argv[]) {
 
     sleep(1);
 
+    printf("Reading file: %s\n", ws_capture_filename(cap));
+
     print_each_packet_text(dissector);
 
     ws_dissect_free(dissector);
