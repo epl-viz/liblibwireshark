@@ -18,7 +18,6 @@
 #include "defs.h"
 
 static void print_each_packet_text(ws_dissect_t *handle);
-static void print_each_packet_manual(ws_dissect_t *handle);
 
 static void print_usage(char *argv[]) {
     printf("Usage: %s [-I] <input_file>\n", argv[0]);
