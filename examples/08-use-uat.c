@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     char *          filename      = "../samples/EPL-IdentResponse.pcapng";
     char            default_xdd[] = "/Users/a3f/pse/resources/profiles/00000000_POWERLINK_CiA401_CN_1.xdc\"";
     int             opt;
-    GArray *disabled = g_array_new(FALSE, FALSE, sizeof(const char *));
+    /*GArray *disabled = g_array_new(FALSE, FALSE, sizeof(const char *));*/
 
     while ((opt = getopt(argc, argv, "p:d:")) != -1) {
         switch (opt) {
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     ws_capture_init();
     ws_dissect_init();
-    static char pref[1024] = "uat:epl_profiles:\"401\",\"";
+    static char pref[1024] = "uat:epl_nodeid_profiles:\"1\",\"";
     size_t pref_len = strlen(pref);
     printf("Enter Profile 401 XDD path (default: \"%s): ",
             default_xdd);
