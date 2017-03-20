@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(libwireshark C)
+project(libwireshark
+            VERSION 1.0.0
+            LANGUAGES C)
 set(CMAKE_BUILD_TYPE Debug)
 
 
