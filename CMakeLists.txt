@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(libwireshark C)
+
+project(libwireshark
+            VERSION 1.0.1
+            LANGUAGES C)
 
 
 set( CM_VERSION_MAJOR    0 )
