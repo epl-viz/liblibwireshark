@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "defs.h"
 
@@ -62,6 +63,8 @@ int main(int argc, char *argv[]) {
     ws_capture_init();
     ws_capture_t *cap = ws_capture_open_offline(filename, 0, &err_code, &err_info);
     my_assert(cap, "Error %d: %s\n", err_code, err_info);
+
+    printf("File size: %" PRIu64 " B\n", ws_capture_file_size(cap));
 
     ws_dissect_init();
     ws_dissect_t *dissector = ws_dissect_capture(cap);

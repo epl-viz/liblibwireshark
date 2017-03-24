@@ -26,10 +26,9 @@ static void print_usage(char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-    char *filename   = NULL;
     int err_code = 0;
     char *err_info;
-    
+
     if (argc != 1) {
         print_usage(argv);
         return 1;
@@ -80,7 +79,7 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Seeking to frame %lu (offset=%" PRId64 ") failed with code=%d (%s)\n",
                         framenum, offset, err_code, err_info);
             }
-            printf("%lld\n", offset);
+            printf("%" PRId64 "\n", offset);
         } else {
             fprintf(stderr, "Invalid frame number (must be in [1, %u]\n", frames->len - 1);
         }

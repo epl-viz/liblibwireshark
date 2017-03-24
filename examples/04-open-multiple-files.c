@@ -24,7 +24,6 @@ static void print_usage(char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-    char *          filename   = NULL;
     enum print_type print_type = PRINT_TEXT;
     int             opt;
 
@@ -48,8 +47,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int err_code;
-    char *err_info;
+    int err_code = 0;
+    char *err_info = NULL;
 
     ws_capture_init();
     ws_dissect_init();

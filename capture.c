@@ -108,6 +108,18 @@ const char *ws_capture_filename(ws_capture_t *cap)
     return cap->cfile.filename;
 }
 
+uint64_t ws_capture_file_size(ws_capture_t *cap) {
+    if(!cap) return UINT64_MAX;
+
+    int err;
+    uint64_t size = wtap_file_size(cap->cfile.wth, &err);
+    if(err != 0) {
+      return UINT64_MAX;
+    }
+
+    return size;
+}
+
 void ws_capture_finalize(void) {
 
 #ifdef _WIN32

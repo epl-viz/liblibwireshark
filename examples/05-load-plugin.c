@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     ws_capture_init();
     ws_dissect_init();
 
-    for (int i = 0; i < disabled->len; i++) {
+    for (unsigned int i = 0; i < disabled->len; i++) {
         const char *dissector = g_array_index(disabled, const char *, i);
         ws_dissect_proto_disable(dissector);
     }

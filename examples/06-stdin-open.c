@@ -7,14 +7,16 @@
 #include <signal.h>
 
 void timeout(int signo) {
+    (void)signo;
     /* doesn't need to do anything */
 }
 
-int main(int argc, char *argv[]) {
+int main() {
     ws_capture_init();
     ws_dissect_init();
 
-    static struct sigaction action = {{0}};
+    static struct sigaction action;
+    memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = timeout;
     sigaction(SIGALRM, &action, NULL);
     alarm(1);

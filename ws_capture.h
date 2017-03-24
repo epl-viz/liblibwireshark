@@ -72,6 +72,14 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_c
 const char *ws_capture_filename(ws_capture_t *cap);
 
 /**
+ * \param cap capture object
+ * \returns the current size of the capture files
+ *
+ * \brief Returns the size of the capture files
+ */
+uint64_t ws_capture_file_size(ws_capture_t *cap);
+
+/**
  * \param capture valid \sa ws_capture_t instance
  *
  * \brief closes capture
