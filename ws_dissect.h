@@ -68,6 +68,12 @@ void ws_dissect_proto_disable(const char *name);
  */
 ws_dissect_t *ws_dissect_capture(ws_capture_t *capture);
 
+/**
+ * \param handle dissection handle
+ * \returns capture handle
+ */
+ws_capture_t *ws_dissect_get_capture(ws_dissect_t *handle);
+
 struct ws_dissection {
     /** offset of packet in file **/
     int64_t offset;

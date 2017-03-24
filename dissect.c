@@ -71,6 +71,10 @@ ws_dissect_t *ws_dissect_capture(ws_capture_t *capture) {
     return handle;
 }
 
+ws_capture_t *ws_dissect_get_capture(ws_dissect_t *handle) {
+    return handle->cap;
+}
+
 gboolean ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst, int *err, char **err_info) {
     assert(src);
     int _err = 0;
