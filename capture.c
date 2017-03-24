@@ -120,6 +120,10 @@ uint64_t ws_capture_file_size(ws_capture_t *cap) {
     return size;
 }
 
+uint64_t ws_capture_read_so_far(ws_capture_t *cap) {
+    return wtap_read_so_far(cap->cfile.wth);
+}
+
 void ws_capture_finalize(void) {
 
 #ifdef _WIN32

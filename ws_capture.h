@@ -80,6 +80,14 @@ const char *ws_capture_filename(ws_capture_t *cap);
 uint64_t ws_capture_file_size(ws_capture_t *cap);
 
 /**
+ * \param cap capture object
+ * \returns approximate location inside the file
+ *
+ * \NOTE Use this when dealing with gzipped files
+ */
+uint64_t ws_capture_read_so_far(ws_capture_t *cap);
+
+/**
  * \param capture valid \sa ws_capture_t instance
  *
  * \brief closes capture
