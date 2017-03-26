@@ -57,7 +57,9 @@ int ws_dissect_init(void) {
     return 0;
 }
 void ws_dissect_finalize(void) {
-    epan_cleanup();
+    // crashes, but we only call this at exit time
+    // So it's no big deal (TM)
+    /*epan_cleanup();*/
     dissect_initialized = FALSE;
 }
 
