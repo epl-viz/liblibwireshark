@@ -5,6 +5,7 @@
 #include "ws_capture.h"
 #include <capchild/capture_session.h>
 #include <capture_info.h>
+#include <glib.h>
 
 typedef struct pipe_input_tag pipe_input_t;
 extern pipe_input_t *pipe_input;
@@ -22,10 +23,12 @@ struct ws_capture_t {
         Buffer buf;
     } seekinfo;
 #endif
-    unsigned is_live      :1;
-    unsigned is_wtap_open :1;
-    unsigned is_running   :1;
+    unsigned is_live           :1;
+    unsigned is_running        :1;
     struct {
+        int err;
+        char *err_info;
+
         capture_options opts;
         capture_session session;
         info_data_t info_data;

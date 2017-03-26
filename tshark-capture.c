@@ -51,12 +51,15 @@ pipe_input_t *pipe_input;
 const nstime_t * tshark_get_frame_ts(void *data, guint32 frame_num);
 
 void
-capture_input_error_message(capture_session *cap_session _U_, char *error_msg, char *secondary_error_msg)
+capture_input_error_message(capture_session *cap_session, char *error_msg, char *secondary_error_msg)
 {
     cmdarg_err("%s", error_msg);
     cmdarg_err_cont("%s", secondary_error_msg);
 
     CAPTURE_CALLBACK(cap_session, input_error_message, error_msg, secondary_error_msg);
+
+    CAPTURE_OF(cap_session)->dumpcap->err = -1;
+    CAPTURE_OF(cap_session)->dumpcap->err_info = g_strdup_printf("%s\n%s", error_msg, secondary_error_msg);
 }
 
 extern epan_t * tshark_epan_new(capture_file *cf);
@@ -195,8 +198,10 @@ capture_input_new_file(capture_session *cap_session, gchar *new_file)
 
     cap_session->state = CAPTURE_RUNNING;
 
-    CAPTURE_OF(cap_session)->is_wtap_open = 1;
     CAPTURE_CALLBACK(cap_session, input_new_file, new_file);
+
+    CAPTURE_OF(cap_session)->dumpcap->err = 0;
+    CAPTURE_OF(cap_session)->dumpcap->err_info = NULL;
     return TRUE;
 }
 

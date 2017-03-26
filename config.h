@@ -15,7 +15,6 @@
 #define HAVE_UNISTD_H
 #define HAVE_SYS_STAT_H
 
-#define USE_TSHARK_SELECT
 #define HAVE_PCAP_CREATE
 
 #endif

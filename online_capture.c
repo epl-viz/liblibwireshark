@@ -16,6 +16,7 @@
 #include <capture_info.h>
 #include <errno.h>
 #include <sys/select.h>
+#include <glib.h>
 /**
  * capchild deps:
  *  "append_extcap_interface_list", available in:
@@ -83,6 +84,7 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_c
     cap_file_init(&cap->cfile);
     cap->cfile.frames = new_frame_data_sequence();
     ws_buffer_init(&cap->buf, 1500);
+    cap->cfile.wth = NULL;
 
     if (cb) {
         memcpy(&cap->dumpcap->cb, cb, sizeof cap->dumpcap->cb);
@@ -116,7 +118,17 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_c
     timestamp_set_precision(TS_PREC_AUTO);
 
     cap->is_live      = 1;
-    cap->is_wtap_open = 0;
+
+    ws_capture_await_data(cap);
+
+    if (cap->dumpcap->err) {
+        _err = cap->dumpcap->err;
+        _err_info = cap->dumpcap->err_info;
+
+        PROVIDE_ERRORS;
+        ws_capture_close(cap);
+        return NULL;
+    }
 
     return cap;
 }
@@ -131,7 +143,6 @@ gboolean ws_capture_await_data(ws_capture_t *cap) {
     pipe_input_t *pipe_input = &cap->dumpcap->pipe_input;
     FD_SET(pipe_input->source, &readfds);
 
-#ifdef USE_TSHARK_SELECT
     int ret = select(pipe_input->source+1, &readfds, NULL, NULL, NULL);
 
     if (ret == -1)
@@ -139,7 +150,6 @@ gboolean ws_capture_await_data(ws_capture_t *cap) {
         fprintf(stderr, "%s: %s\n", "select()", g_strerror(errno));
         return TRUE;
     } else if (ret == 1) {
-#endif
         /*capture_input_new_packets2(&global_capture_session, 1);*/
 
         /* Call the real handler */

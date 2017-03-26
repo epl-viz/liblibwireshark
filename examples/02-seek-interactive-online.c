@@ -47,8 +47,6 @@ int main(int argc, char *argv[]) {
     GArray *frames = g_array_new(FALSE, FALSE, sizeof(int64_t));
     g_array_append_val(frames, (int64_t){0});
 
-    sleep(3);
-
     char timestamp[WS_ISO8601_LEN];
     struct ws_dissection packet;
     while (!exit_loop && ws_dissect_next(dissector, &packet, &err_code, &err_info)) {

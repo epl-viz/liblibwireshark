@@ -90,12 +90,14 @@ gboolean ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst, int *err,
         assert(cfile->wth);
         wtap_cleareof(cfile->wth);
     }
+#if 0
     if (!src->cap->is_wtap_open) {
         _err = -1;
         _err_info = g_strdup("WTAP file not open yet");
         PROVIDE_ERRORS;
         return FALSE;
     }
+#endif
 
     struct wtap_pkthdr *whdr = wtap_phdr(cfile->wth);
     unsigned char      *buf = wtap_buf_ptr(cfile->wth);

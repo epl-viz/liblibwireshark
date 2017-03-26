@@ -73,7 +73,6 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, cha
     ws_capture_t *cap = g_malloc0(sizeof *cap);
     cap->cfile = cfile;
     cap->buf = buf;
-    cap->is_wtap_open = 1;
 
     return cap;
 }
@@ -87,7 +86,8 @@ void ws_capture_close(ws_capture_t *cap) {
     }
     cap->cfile.frames = NULL;
 
-    wtap_close(cap->cfile.wth);
+    if (cap->cfile.wth)
+        wtap_close(cap->cfile.wth);
     if (cap->is_live)
         ws_capture_live_close(cap);
     /*if (cf->is_tempfile) ws_unlink(cf->filename);*/
