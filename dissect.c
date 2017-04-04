@@ -102,7 +102,6 @@ gboolean ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst, int *err,
 #endif
 
     struct wtap_pkthdr *whdr = wtap_phdr(cfile->wth);
-    unsigned char      *buf = wtap_buf_ptr(cfile->wth);
 
     // clear last dissected buffer
     if (src->edt) epan_dissect_free(src->edt);
@@ -128,7 +127,7 @@ gboolean ws_dissect_next(ws_dissect_t *src, struct ws_dissection *dst, int *err,
         cfile->ref = &ref_frame;
     }
 
-    epan_dissect_run_with_taps(src->edt, cfile->cd_t, whdr, frame_tvbuff_new(&fdlocal, buf), &fdlocal, NULL);
+    epan_dissect_run_with_taps(src->edt, cfile->cd_t, whdr, frame_tvbuff_new(&fdlocal, wtap_buf_ptr(cfile->wth)), &fdlocal, NULL);
 
     frame_data_set_after_dissect(&fdlocal, &cum_bytes);
     cfile->prev_cap = cfile->prev_dis = frame_data_sequence_add(cfile->frames, &fdlocal);
