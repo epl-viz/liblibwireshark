@@ -126,6 +126,7 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_c
         _err_info = cap->dumpcap->err_info;
 
         PROVIDE_ERRORS;
+        epan_free(cap->cfile.epan);
         ws_capture_close(cap);
         return NULL;
     }

@@ -88,10 +88,8 @@ void ws_capture_close(ws_capture_t *cap) {
 
     if (cap->cfile.wth)
         wtap_close(cap->cfile.wth);
-    if (cap->is_live) {
+    if (cap->is_live)
         ws_capture_live_close(cap);
-        epan_free(cap->cfile.epan);
-    }
     /*if (cf->is_tempfile) ws_unlink(cf->filename);*/
     g_free(cap->cfile.filename);
 
