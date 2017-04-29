@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <capture_opts.h>
-#include <capchild/capture_session.h>
-#include <capchild/capture_sync.h>
+#include "capchild/capture_session.h"
+#include "capchild/capture_sync.h"
 #include <epan/epan.h>
 #include <epan/epan-int.h>
 #include <unistd.h>

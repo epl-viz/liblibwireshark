@@ -9,6 +9,8 @@ set( CM_VERSION_MAJOR    0 )
 set( CM_VERSION_MINOR    0 )
 set( CM_VERSION_SUBMINOR 2 )
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR})
+
 include( CMakePackageConfigHelpers )
 
 option( ENABLE_EXAMPLES "Enables the example exes" ON )
@@ -22,7 +24,7 @@ if(MSVC)
   endif()
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUC)
   # Update if necessary
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -std=gnu11 -fPIC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -std=gnu11 -fPIC -fdiagnostics-color=always")
 endif()
 
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
@@ -30,11 +32,12 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 find_package( Wireshark REQUIRED )
 find_package( PkgConfig REQUIRED )
 pkg_search_module(GLIB REQUIRED glib-2.0)
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 find_package( PCAP REQUIRED )
 
 message( STATUS "Wireshark version:     ${Wireshark_VERSION_STRING}" )
 message( STATUS "Wireshark install dir: ${Wireshark_INSTALL_DIR}" )
+
+configure_file(${PROJECT_SOURCE_DIR}/cmakeconfig.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS} ${PCAP_INCLUDE_DIR})
 include_directories(        ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include )
@@ -85,8 +88,11 @@ add_definitions(
     -DHAVE_EXTCAP=1
     -DHAVE_LIBPCAP=1
     -DWITH_ONLINE_CAPTURE=1
+    -DWS_NORETURN=_Noreturn
 )
 
+add_subdirectory(capchild)
+add_subdirectory(caputils)
 
 # this is the "object library" target: compiles the sources only once
 add_library(objlib OBJECT ${src} ${header})
@@ -104,16 +110,17 @@ set_target_properties(
     OUTPUT_NAME   "${PROJECT_NAME}"
 )
 
-add_definitions(-DWS_NORETURN=_Noreturn)
-
 target_link_libraries(${PROJECT_NAME}
+  PUBLIC
     ${Wireshark_LIBRARY}
     wiretap
     wsutil
-    capchild
     ${GLIB_LIBRARIES}
+    ${PCAP_LIBRARY}
+
+  PRIVATE
+    capchild
     caputils
-   ${PCAP_LIBRARY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

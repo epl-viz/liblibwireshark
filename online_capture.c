@@ -8,8 +8,8 @@
 #include "ws_dissect-internal.h"
 #include "frame_tvbuff.h"
 #include <capture_opts.h>
-#include <capchild/capture_session.h>
-#include <capchild/capture_sync.h>
+#include "capchild/capture_session.h"
+#include "capchild/capture_sync.h"
 #include <epan/epan.h>
 #include <epan/timestamp.h>
 #include <epan/epan-int.h>
@@ -114,7 +114,7 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_c
         return NULL;
     }
 
-    
+
     timestamp_set_precision(TS_PREC_AUTO);
 
     cap->is_live      = 1;

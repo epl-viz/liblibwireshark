@@ -12,7 +12,7 @@
 #include <wsutil/filesystem.h>
 #include <epan/asm_utils.h>
 
-#include <caputils/capture_ifinfo.h>
+#include "caputils/capture_ifinfo.h"
 
 #include <wsutil/privileges.h>
 #include <wsutil/plugins.h>

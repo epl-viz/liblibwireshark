@@ -3,7 +3,7 @@
 
 #include "cfile.h"
 #include "ws_capture.h"
-#include <capchild/capture_session.h>
+#include "capchild/capture_session.h"
 #include <capture_info.h>
 #include <glib.h>
 
