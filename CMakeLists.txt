@@ -31,8 +31,8 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 
 find_package( Wireshark REQUIRED )
 find_package( PkgConfig REQUIRED )
-pkg_search_module(GLIB REQUIRED glib-2.0)
-find_package( PCAP REQUIRED )
+find_package( GLIB2     REQUIRED )
+find_package( PCAP      REQUIRED )
 
 message( STATUS "Wireshark version:     ${Wireshark_VERSION_STRING}" )
 message( STATUS "Wireshark install dir: ${Wireshark_INSTALL_DIR}" )
