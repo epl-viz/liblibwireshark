@@ -11,6 +11,15 @@ set( CM_VERSION_SUBMINOR 2 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR})
 
+if(WIN32)
+  set(WIRESHARK_TARGET_PLATFORM win64)
+  set(PROCESSOR_ARCHITECTURE amd64)
+endif(WIN32)
+
+if( WIRESHARK_BASE_DIR )
+  set( ENV{WIRESHARK_BASE_DIR} "${WIRESHARK_BASE_DIR}" )
+endif( WIRESHARK_BASE_DIR )
+
 include( CMakePackageConfigHelpers )
 
 option( ENABLE_EXAMPLES "Enables the example exes" ON )
@@ -30,14 +39,13 @@ endif()
 set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 
 find_package( Wireshark REQUIRED )
-find_package( PkgConfig REQUIRED )
 find_package( GLIB2     REQUIRED )
 find_package( PCAP      REQUIRED )
 
 message( STATUS "Wireshark version:     ${Wireshark_VERSION_STRING}" )
 message( STATUS "Wireshark install dir: ${Wireshark_INSTALL_DIR}" )
 
-include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB_INCLUDE_DIRS} ${PCAP_INCLUDE_DIR})
+include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB2_INCLUDE_DIRS} ${PCAP_INCLUDE_DIR})
 include_directories(        ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include )
 link_directories( ${Wireshark_LIB_DIR} )
 
@@ -86,8 +94,13 @@ add_definitions(
     -DHAVE_EXTCAP=1
     -DHAVE_LIBPCAP=1
     -DWITH_ONLINE_CAPTURE=1
-    -DWS_NORETURN=_Noreturn
 )
+
+if(WIN32)
+  add_definitions( -DWS_NORETURN= )
+else(WIN32)
+  add_definitions( -DWS_NORETURN=_Noreturn )
+endif(WIN32)
 
 add_subdirectory(capchild)
 add_subdirectory(caputils)
