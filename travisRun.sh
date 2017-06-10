@@ -95,8 +95,8 @@ testExec chmod -R a+rwx .
 
 msg "START TEST"
 
-testExecNoRoot     LD_LIBRARY_PATH="/usr/lib" make tests
-testFail           LD_LIBRARY_PATH="/usr/lib" make tests
-testExecNoRootFail LD_LIBRARY_PATH="/usr/lib" make tests --asd-asdf
+testExecNoRoot     LD_LIBRARY_PATH="/usr/lib" make test
+testFail           LD_LIBRARY_PATH="/usr/lib" make test
+testExecNoRootFail LD_LIBRARY_PATH="/usr/lib" make test --asd-asdf
 
 exit $ERROR_COUNT
