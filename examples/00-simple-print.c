@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <glib.h>
 
 #include "defs.h"
 
@@ -24,18 +25,18 @@ static void print_usage(char *argv[]) {
     printf("Usage: %s [-t <manual|text> (default text)] <input_file>\n", argv[0]);
 }
 
+
 int main(int argc, char *argv[]) {
-    char *          filename   = NULL;
+    char           *filename   = NULL;
     enum print_type print_type = PRINT_TEXT;
     int             opt;
-
 
     while ((opt = getopt(argc, argv, "t:")) != -1) {
         switch (opt) {
             case 't':
-                      if (strcmp(optarg, "manual") == 0) {
+                      if (g_ascii_strcasecmp(optarg, "manual") == 0) {
                           print_type = PRINT_MANUAL;
-                      } else if (strcmp(optarg, "text") == 0) {
+                      } else if (g_ascii_strcasecmp(optarg, "text") == 0) {
                           print_type = PRINT_TEXT;
                       }
                       break;
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    filename = strdup(argv[optind]);
+    filename = argv[optind];
 
     if (access(filename, F_OK) == -1) {
         fprintf(stderr, "File '%s' doesn't exist.\n", filename);

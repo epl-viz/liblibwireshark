@@ -4,6 +4,7 @@ project(libwireshark
             VERSION 1.0.1
             LANGUAGES C)
 
+enable_testing()
 
 set( CM_VERSION_MAJOR    0 )
 set( CM_VERSION_MINOR    0 )
@@ -143,7 +144,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     )
 endif()
 
-
 if( ENABLE_EXAMPLES )
 
   # examples
@@ -152,17 +152,21 @@ if( ENABLE_EXAMPLES )
   add_executable(simple_print ${simple_print_src})
   target_compile_options(simple_print PUBLIC ${GLIB2_CFLAGS_OTHER})
   target_link_libraries(simple_print ${PROJECT_NAME} ${GLIB2_LIBRARIES})
+  add_test(simple_print simple_print "-t text" "${CMAKE_CURRENT_LIST_DIR}/samples/1-EPL-Frame.pcapng")
+
   # 1
   file(GLOB seek_offline_src examples/01-seek-interactive-offline.c)
   add_executable(seek_offline ${seek_offline_src})
   target_compile_options(seek_offline PUBLIC ${GLIB2_CFLAGS_OTHER})
   target_link_libraries(seek_offline ${PROJECT_NAME} ${GLIB2_LIBRARIES})
+  
   # 2
   file(GLOB seek_online_src examples/02-seek-interactive-online.c)
   MESSAGE(STATUS ${seek_online_src})
   add_executable(seek_online ${seek_online_src})
   target_compile_options(seek_online PUBLIC ${GLIB2_CFLAGS_OTHER})
   target_link_libraries(seek_online ${PROJECT_NAME} ${GLIB2_LIBRARIES})
+
   #4
   file(GLOB multiple_print_src examples/04-open-multiple-files.c)
   add_executable(multiple_print ${multiple_print_src})

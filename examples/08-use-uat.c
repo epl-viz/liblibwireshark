@@ -60,18 +60,19 @@ int main(int argc, char *argv[]) {
     }
     printf("Calling prefs_set_pref(\"%s\")\n", pref);
 
-    switch(prefs_set_pref(pref)) {
+    char *err;
+    switch(prefs_set_pref(pref, &err)) {
         case PREFS_SET_SYNTAX_ERR:
-            puts("Syntax error!");
+            printf("Syntax error%s%s\n", err ? ": " : "", err ? err : "");
             return 1;
         case PREFS_SET_NO_SUCH_PREF:
-            puts("Preference doesn't exist!");
+            printf("Preference doesn't exist%s%s\n", err ? ": " : "", err ? err : "");
             return 2;
         case PREFS_SET_OBSOLETE:
-            puts("Preference is obsolete!");
+            printf("Preference is obsolete%s%s\n" , err ? ": " : "", err ? err : "");
             break;
         case PREFS_SET_OK:
-            puts("Preferences set!");
+            printf("Preferences set!\n");
             break;
     }
     prefs_apply_all();
