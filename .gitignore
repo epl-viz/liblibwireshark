@@ -9,4 +9,7 @@ build/
 *.pyc
 .DS_Store
 private.cmake
+.deps/
+*.o
+*.a
 
