@@ -52,12 +52,10 @@ fi
 
 if [[ "$1" == "g++" ]]; then
   msg "Detected compiler \x1b[1;33mGCC"
-  msg "Enabling Coverage data collection"
   export CXX=g++
   export CC=gcc
 elif [[ "$1" == "clang++" ]]; then
   msg "Detected compiler \x1b[1;33mLLVM / CLANG"
-  msg "Disabling Coverage data collection"
   export CXX=clang++
   export CC=clang
 else
@@ -85,14 +83,12 @@ testExec popd
 testExec popd
 
 msg "Setting up the build env"
-testExec lcov --directory . --zerocounters
-testExec ./checkFormat.sh --only-check
 testExec mkdir       $BUILD_DIR
 testExec cd          $BUILD_DIR
 
 msg "START BUILD"
 
-testExec cmake -DENABLE_CODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/EPL -DWireshark_DIR=/EPL ..
+testExec cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/EPL -DWireshark_DIR=/EPL ..
 testExec make
 testExec ln -s /EPL/bin/dumpcap ./bin
 testExec chmod -R a+rwx .
@@ -102,10 +98,5 @@ msg "START TEST"
 testExecNoRoot     LD_LIBRARY_PATH="/usr/lib" make tests
 testFail           LD_LIBRARY_PATH="/usr/lib" make tests
 testExecNoRootFail LD_LIBRARY_PATH="/usr/lib" make tests --asd-asdf
-
-if (( $ERROR_COUNT == 0 )); then
-  msg "Installing files"
-  testExec make install
-fi
 
 exit $ERROR_COUNT
