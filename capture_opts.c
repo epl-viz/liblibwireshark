@@ -43,7 +43,7 @@
 #include "caputils/capture_ifinfo.h"
 #include "caputils/capture-pcap-util.h"
 
-#include "filter_files.h"
+#include "ui/filter_files.h"
 
 static gboolean capture_opts_output_to_pipe(const char *save_file, gboolean *is_pipe);
 
@@ -68,6 +68,8 @@ capture_opts_init(capture_options *capture_opts)
     capture_opts->default_options.extcap_args     = NULL;
     capture_opts->default_options.extcap_userdata = NULL;
     capture_opts->default_options.extcap_pid      = INVALID_EXTCAP_PID;
+    capture_opts->default_options.extcap_control_in  = NULL;
+    capture_opts->default_options.extcap_control_out = NULL;
 #endif
 #ifdef CAN_SET_CAPTURE_BUFFER_SIZE
     capture_opts->default_options.buffer_size     = DEFAULT_CAPTURE_BUFFER_SIZE;
@@ -121,6 +123,21 @@ capture_opts_init(capture_options *capture_opts)
     capture_opts->capture_child                   = FALSE;
 }
 
+void
+capture_opts_cleanup(capture_options *capture_opts)
+{
+    if (!capture_opts)
+        return;
+
+    if (capture_opts->ifaces) {
+        g_array_free(capture_opts->ifaces, TRUE);
+        capture_opts->ifaces = NULL;
+    }
+    if (capture_opts->all_ifaces) {
+        g_array_free(capture_opts->all_ifaces, TRUE);
+        capture_opts->all_ifaces = NULL;
+    }
+}
 
 /* log content of capture_opts */
 void
@@ -270,7 +287,7 @@ set_autostop_criterion(capture_options *capture_opts, const char *autostoparg)
         capture_opts->autostop_duration = get_positive_int(p,"autostop duration");
     } else if (strcmp(autostoparg,"filesize") == 0) {
         capture_opts->has_autostop_filesize = TRUE;
-        capture_opts->autostop_filesize = get_positive_int(p,"autostop filesize");
+        capture_opts->autostop_filesize = get_nonzero_guint32(p,"autostop filesize");
     } else if (strcmp(autostoparg,"files") == 0) {
         capture_opts->multi_files_on = TRUE;
         capture_opts->has_autostop_files = TRUE;
@@ -373,10 +390,10 @@ get_ring_arguments(capture_options *capture_opts, const char *arg)
 
     if (strcmp(arg,"files") == 0) {
         capture_opts->has_ring_num_files = TRUE;
-        capture_opts->ring_num_files = get_positive_int(p, "number of ring buffer files");
+        capture_opts->ring_num_files = get_nonzero_guint32(p, "number of ring buffer files");
     } else if (strcmp(arg,"filesize") == 0) {
         capture_opts->has_autostop_filesize = TRUE;
-        capture_opts->autostop_filesize = get_positive_int(p, "ring buffer filesize");
+        capture_opts->autostop_filesize = get_nonzero_guint32(p, "ring buffer filesize");
     } else if (strcmp(arg,"duration") == 0) {
         capture_opts->has_file_duration = TRUE;
         capture_opts->file_duration = get_positive_int(p, "ring buffer duration");
@@ -687,6 +704,8 @@ capture_opts_add_iface_opt(capture_options *capture_opts, const char *optarg_str
     interface_opts.extcap_args = NULL;
     interface_opts.extcap_pid = INVALID_EXTCAP_PID;
     interface_opts.extcap_userdata = NULL;
+    interface_opts.extcap_control_in = g_strdup(capture_opts->default_options.extcap_control_in);
+    interface_opts.extcap_control_out = g_strdup(capture_opts->default_options.extcap_control_out);
 #endif
 #ifdef CAN_SET_CAPTURE_BUFFER_SIZE
     interface_opts.buffer_size = capture_opts->default_options.buffer_size;
@@ -1042,9 +1061,6 @@ capture_opts_default_iface_if_necessary(capture_options *capture_opts,
 static int
 capture_opts_test_for_fifo(const char *path)
 {
-  (void)path;
-    //FIXME
-#if 0
     ws_statb64 statb;
 
     if (ws_stat64(path, &statb) < 0)
@@ -1053,7 +1069,6 @@ capture_opts_test_for_fifo(const char *path)
     if (S_ISFIFO(statb.st_mode))
         return ESPIPE;
     else
-#endif
         return 0;
 }
 
@@ -1118,6 +1133,8 @@ capture_opts_del_iface(capture_options *capture_opts, guint if_index)
     if (interface_opts.extcap_pid != INVALID_EXTCAP_PID)
         g_spawn_close_pid(interface_opts.extcap_pid);
     g_free(interface_opts.extcap_userdata);
+    g_free(interface_opts.extcap_control_in);
+    g_free(interface_opts.extcap_control_out);
 #endif
 #ifdef HAVE_PCAP_REMOTE
     if (interface_opts.src_type == CAPTURE_IFREMOTE) {
@@ -1169,6 +1186,8 @@ collect_ifaces(capture_options *capture_opts)
             if (interface_opts.extcap_args)
                 g_hash_table_ref(interface_opts.extcap_args);
             interface_opts.extcap_userdata = NULL;
+            interface_opts.extcap_control_in = NULL;
+            interface_opts.extcap_control_out = NULL;
 #endif
 #ifdef CAN_SET_CAPTURE_BUFFER_SIZE
             interface_opts.buffer_size =  device.buffer;

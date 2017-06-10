@@ -4,7 +4,7 @@ As libwireshark is not public API, it is prone to change and break non-official 
 This project aims to provide a thin frequently-updated wrapper around the core capture/dissect functionality that other applications can then link against.
 
 
-Tested working with Wireshark `v2.2.4` on macOS Sierra.
+Tested working with Wireshark `v2.4.0` on macOS Sierra.
 
 #### Usage
 

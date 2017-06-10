@@ -54,12 +54,12 @@ static GList * append_remote_list(GList *iflist)
 
     for (rlist = g_list_nth(remote_interface_list, 0); rlist != NULL; rlist = g_list_next(rlist)) {
         if_info = (if_info_t *)rlist->data;
-        temp = g_malloc0(sizeof(if_info_t));
+        temp = (if_info_t*) g_malloc0(sizeof(if_info_t));
         temp->name = g_strdup(if_info->name);
         temp->friendly_name = g_strdup(if_info->friendly_name);
         temp->vendor_description = g_strdup(if_info->vendor_description);
         for (list = g_slist_nth(if_info->addrs, 0); list != NULL; list = g_slist_next(list)) {
-            temp_addr = g_malloc0(sizeof(if_addr_t));
+            temp_addr = (if_addr_t *) g_malloc0(sizeof(if_addr_t));
             if_addr = (if_addr_t *)list->data;
             if (if_addr) {
                 temp_addr->ifat_type = if_addr->ifat_type;
@@ -111,16 +111,29 @@ capture_interface_list(int *err, char **err_str, void (*update_cb)(void))
     /* Try to get our interface list */
     ret = sync_interface_list_open(&data, &primary_msg, &secondary_msg, update_cb);
     if (ret != 0) {
-        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface List failed, error %d, %s (%s)!",
-              *err, primary_msg ? primary_msg : "no message",
-              secondary_msg ? secondary_msg : "no secondary message");
-        if (err_str) {
-            *err_str = primary_msg;
-        } else {
-            g_free(primary_msg);
+#ifdef HAVE_EXTCAP
+        /* Add the extcap interfaces that can exist, even if no native interfaces have been found */
+        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Loading External Capture Interface List ...");
+        if_list = append_extcap_interface_list(if_list, err_str);
+        /* err_str is ignored, as the error for the interface loading list will take precedence */
+        if ( g_list_length(if_list) == 0 ) {
+#endif
+
+            g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface List failed. Error %d, %s (%s)",
+                  *err, primary_msg ? primary_msg : "no message",
+                  secondary_msg ? secondary_msg : "no secondary message");
+            if (err_str) {
+                *err_str = primary_msg;
+            } else {
+                g_free(primary_msg);
+            }
+            g_free(secondary_msg);
+            *err = CANT_GET_INTERFACE_LIST;
+
+#ifdef HAVE_EXTCAP
         }
-        g_free(secondary_msg);
-        *err = CANT_GET_INTERFACE_LIST;
+#endif
+
         return if_list;
     }
 
@@ -238,7 +251,7 @@ capture_get_if_capabilities(const gchar *ifname, gboolean monitor_mode,
     err = sync_if_capabilities_open(ifname, monitor_mode, auth_string, &data,
                                     &primary_msg, &secondary_msg, update_cb);
     if (err != 0) {
-        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface Capabilities failed, error %d, %s (%s)!",
+        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface Capabilities failed. Error %d, %s (%s)",
               err, primary_msg ? primary_msg : "no message",
               secondary_msg ? secondary_msg : "no secondary message");
         if (err_str) {
@@ -262,7 +275,7 @@ capture_get_if_capabilities(const gchar *ifname, gboolean monitor_mode,
      * First line is 0 if monitor mode isn't supported, 1 if it is.
      */
     if (raw_list[0] == NULL || *raw_list[0] == '\0') {
-        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface Capabilities returned no information!");
+        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface Capabilities returned no information.");
         if (err_str) {
             *err_str = g_strdup("Dumpcap returned no interface capability information");
         }
@@ -285,7 +298,7 @@ capture_get_if_capabilities(const gchar *ifname, gboolean monitor_mode,
         break;
 
     default:
-        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface Capabilities returned bad information!");
+        g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_MESSAGE, "Capture Interface Capabilities returned bad information.");
         if (err_str) {
             *err_str = g_strdup_printf("Dumpcap returned \"%s\" for monitor-mode capability",
                                        raw_list[0]);
@@ -337,12 +350,12 @@ void add_interface_to_remote_list(if_info_t *if_info)
     GSList *list;
     if_addr_t *if_addr, *temp_addr;
 
-    if_info_t *temp = g_malloc0(sizeof(if_info_t));
+    if_info_t *temp = (if_info_t*) g_malloc0(sizeof(if_info_t));
     temp->name = g_strdup(if_info->name);
     temp->friendly_name = g_strdup(if_info->friendly_name);
     temp->vendor_description = g_strdup(if_info->vendor_description);
     for (list = g_slist_nth(if_info->addrs, 0); list != NULL; list = g_slist_next(list)) {
-        temp_addr = g_malloc0(sizeof(if_addr_t));
+        temp_addr = (if_addr_t *)g_malloc0(sizeof(if_addr_t));
         if_addr = (if_addr_t *)list->data;
         if (if_addr) {
             temp_addr->ifat_type = if_addr->ifat_type;

@@ -41,7 +41,7 @@
 
 #ifdef _WIN32
 
-void win32_readfrompipe(HANDLE read_pipe, gint32 max_buffer, gchar * buffer)
+void win32_readfrompipe(HANDLE read_pipe, gint32 max_buffer, gchar *buffer)
 {
     gboolean bSuccess = FALSE;
     gint32 bytes_written = 0;
@@ -68,13 +68,13 @@ void win32_readfrompipe(HANDLE read_pipe, gint32 max_buffer, gchar * buffer)
 }
 #endif
 
-gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar ** args, gchar ** command_output )
+gboolean extcap_spawn_sync(gchar *dirname, gchar *command, gint argc, gchar **args, gchar **command_output)
 {
     gboolean status = FALSE;
     gboolean result = FALSE;
-    gchar ** argv = NULL;
+    gchar **argv = NULL;
     gint cnt = 0;
-    gchar * local_output = NULL;
+    gchar *local_output = NULL;
 #ifdef _WIN32
 
 #define BUFFER_SIZE 4096
@@ -93,8 +93,8 @@ gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar 
     HANDLE child_stderr_rd = NULL;
     HANDLE child_stderr_wr = NULL;
 
-    const gchar * oldpath = g_getenv("PATH");
-    gchar * newpath = NULL;
+    const gchar *oldpath = g_getenv("PATH");
+    gchar *newpath = NULL;
 #else
     gint exit_status = 0;
 #endif
@@ -110,9 +110,9 @@ gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar 
     argv[0] = g_strdup(command);
 #endif
 
-    for ( cnt = 0; cnt < argc; cnt++ )
-        argv[cnt+1] = args[cnt];
-    argv[argc+1] = NULL;
+    for (cnt = 0; cnt < argc; cnt++)
+        argv[cnt + 1] = args[cnt];
+    argv[argc + 1] = NULL;
 
 #ifdef _WIN32
 
@@ -122,6 +122,7 @@ gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar 
 
     if (!CreatePipe(&child_stdout_rd, &child_stdout_wr, &sa, 0))
     {
+        g_free(argv[0]);
         g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "Could not create stdout handle");
         return FALSE;
     }
@@ -130,6 +131,7 @@ gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar 
     {
         CloseHandle(child_stdout_rd);
         CloseHandle(child_stdout_wr);
+        g_free(argv[0]);
         g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "Could not create stderr handle");
         return FALSE;
     }
@@ -177,7 +179,7 @@ gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar 
 #else
 
     status = g_spawn_sync(dirname, argv, NULL,
-            (GSpawnFlags) 0, NULL, NULL, &local_output, NULL, &exit_status, NULL);
+                          (GSpawnFlags) 0, NULL, NULL, &local_output, NULL, &exit_status, NULL);
 
     if (status && exit_status != 0)
         status = FALSE;
@@ -185,25 +187,26 @@ gboolean extcap_spawn_sync ( gchar * dirname, gchar * command, gint argc, gchar 
 
     if (status)
     {
-        if ( command_output != NULL && local_output != NULL )
+        if (command_output != NULL && local_output != NULL)
             *command_output = g_strdup(local_output);
 
         result = TRUE;
     }
 
     g_free(local_output);
+    g_free(argv[0]);
     g_free(argv);
 
     return result;
 }
 
-GPid extcap_spawn_async(extcap_userdata * userdata, GPtrArray * args)
+GPid extcap_spawn_async(extcap_userdata *userdata, GPtrArray *args)
 {
     GPid pid = INVALID_EXTCAP_PID;
 
 #ifdef _WIN32
     gint cnt = 0;
-    gchar ** tmp = NULL;
+    gchar **tmp = NULL;
 
     GString *winargs = g_string_sized_new(200);
     gchar *quoted_arg;
@@ -218,8 +221,8 @@ GPid extcap_spawn_async(extcap_userdata * userdata, GPtrArray * args)
     HANDLE child_stderr_rd = NULL;
     HANDLE child_stderr_wr = NULL;
 
-    const gchar * oldpath = g_getenv("PATH");
-    gchar * newpath = NULL;
+    const gchar *oldpath = g_getenv("PATH");
+    gchar *newpath = NULL;
 
     newpath = g_strdup_printf("%s;%s", g_strescape(get_progfile_dir(), NULL), oldpath);
     g_setenv("PATH", newpath, TRUE);
@@ -274,8 +277,8 @@ GPid extcap_spawn_async(extcap_userdata * userdata, GPtrArray * args)
     g_setenv("PATH", oldpath, TRUE);
 #else
     g_spawn_async_with_pipes(NULL, (gchar **)args->pdata, NULL,
-            (GSpawnFlags) G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL,
-            &pid, NULL, &userdata->extcap_stdout_rd, &userdata->extcap_stderr_rd, NULL);
+                             (GSpawnFlags) G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL,
+                             &pid, NULL, &userdata->extcap_stdout_rd, &userdata->extcap_stderr_rd, NULL);
 #endif
 
     userdata->pid = pid;
@@ -290,8 +293,8 @@ extcap_wait_for_pipe(HANDLE pipe_h, HANDLE pid)
     DWORD dw;
     HANDLE handles[2];
     OVERLAPPED ov;
-    ov.Pointer = 0;
     gboolean success = FALSE;
+    ov.Pointer = 0;
     ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
     ConnectNamedPipe(pipe_h, &ov);
@@ -330,11 +333,11 @@ extcap_wait_for_pipe(HANDLE pipe_h, HANDLE pid)
         else if (dw == (WAIT_OBJECT_0 + 1))
         {
             /* extcap process terminated. */
-            g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "extcap terminated without connecting to pipe!");
+            g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "extcap terminated without connecting to pipe.");
         }
         else if (dw == WAIT_TIMEOUT)
         {
-            g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "extcap didn't connect to pipe within 30 seconds!");
+            g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "extcap didn't connect to pipe within 30 seconds.");
         }
         else
         {

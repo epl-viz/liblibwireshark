@@ -9,6 +9,8 @@
 #include "frame_tvbuff.h"
 #include <capture_opts.h>
 #include "capchild/capture_session.h"
+#include "file.h"
+#include "epan/prefs.h"
 #include "capchild/capture_sync.h"
 #include <epan/epan.h>
 #include <epan/timestamp.h>
@@ -171,8 +173,8 @@ tshark_epan_new(capture_file *cf)
 
   epan->data = cf;
   epan->get_frame_ts = tshark_get_frame_ts;
-  /* TODO: This crashes in the GUI only when we are using cap_file_get_interface_name */
-  epan->get_interface_name = NULL;
+  epan->get_interface_name = cap_file_get_interface_name;
+  epan->get_interface_description = cap_file_get_interface_description;
   epan->get_user_comment = NULL;
 
   return epan;

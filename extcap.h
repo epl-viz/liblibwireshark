@@ -43,25 +43,40 @@
 #define EXTCAP_PIPE_PREFIX "wireshark_extcap"
 
 #define EXTCAP_ARGUMENT_CONFIG                  "--extcap-config"
-#define EXTCAP_ARGUMENT_LIST_INTERFACES "--extcap-interfaces"
+#define EXTCAP_ARGUMENT_LIST_INTERFACES         "--extcap-interfaces"
 #define EXTCAP_ARGUMENT_INTERFACE               "--extcap-interface"
 #define EXTCAP_ARGUMENT_LIST_DLTS               "--extcap-dlts"
 
 #define EXTCAP_ARGUMENT_RUN_CAPTURE             "--capture"
 #define EXTCAP_ARGUMENT_CAPTURE_FILTER          "--extcap-capture-filter"
 #define EXTCAP_ARGUMENT_RUN_PIPE                "--fifo"
+#define EXTCAP_ARGUMENT_CONTROL_IN              "--extcap-control-in"
+#define EXTCAP_ARGUMENT_CONTROL_OUT             "--extcap-control-out"
 
 typedef struct _extcap_info {
     gchar * basename;
     gchar * full_path;
     gchar * version;
+    gchar * help;
+
+    GList * interfaces;
 } extcap_info;
+
+typedef enum {
+    EXTCAP_FILTER_UNKNOWN,
+    EXTCAP_FILTER_VALID,
+    EXTCAP_FILTER_INVALID
+} extcap_filter_status;
 
 struct _extcap_arg;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/* Count the number of extcap binaries */
+guint
+extcap_count(void);
 
 /* Registers preferences for all interfaces */
 void
@@ -75,17 +90,53 @@ extcap_get_if_dlts(const gchar * ifname, char ** err_str);
 GList *
 append_extcap_interface_list(GList *list, char **err_str);
 
-/* get a list of all available extcap tools */
+extcap_info *
+extcap_get_tool_info(const gchar * toolname);
+
+extcap_info *
+extcap_get_tool_by_ifname(const gchar *ifname);
+
+/* return the help page or NULL for the given ifname */
+gchar *
+extcap_get_help_for_ifname(const char *ifname);
+
+/* get a list of all available extcap executables and their interfaces */
 GHashTable *
-extcap_tools_list(void);
+extcap_loaded_interfaces(void);
+
+/* remove all loaded interfaces */
+void
+extcap_clear_interfaces(void);
 
 /* returns the configuration for the given interface name, or an
  * empty list, if no configuration has been found */
 GList *
 extcap_get_if_configuration(const char * ifname);
 
+/**
+ * Check if the capture filter for the given interface name is valid.
+ * @param ifname Interface to check
+ * @param filter Capture filter to check
+ * @param err_str Error string returned if filter is invalid
+ * @return Filter check status.
+ */
+extcap_filter_status
+extcap_verify_capture_filter(const char *ifname, const char *filter, gchar **err_str);
+
+/**
+ * Frees the memory from extcap_get_if_configuration.
+ * @param list The list returned by extcap_get_if_configuration.
+ * @param free_args TRUE if all arguments in the list must be freed too or FALSE
+ * if the ownership of the arguments is taken by the caller.
+ */
+void
+extcap_free_if_configuration(GList *list, gboolean free_args);
+
 gboolean
 extcap_has_configuration(const char * ifname, gboolean is_required);
+
+gboolean
+extcap_has_toolbar(const char *ifname);
 
 #ifdef WIN32
 HANDLE

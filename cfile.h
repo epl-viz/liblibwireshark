@@ -87,8 +87,7 @@ typedef struct _capture_file {
   gboolean     drops_known;          /* TRUE if we know how many packets were dropped */
   guint32      drops;                /* Dropped packets */
   nstime_t     elapsed_time;         /* Elapsed time */
-  gboolean     has_snap;             /* TRUE if maximum capture packet length is known */
-  int          snap;                 /* Maximum captured packet length */
+  int          snap;                 /* Maximum captured packet length; 0 if unknown */
   wtap        *wth;                  /* Wiretap session */
   dfilter_t   *rfcode;               /* Compiled read filter program */
   dfilter_t   *dfcode;               /* Compiled display filter program */
@@ -137,6 +136,7 @@ typedef struct _capture_file {
 extern void cap_file_init(capture_file *cf);
 
 extern const char *cap_file_get_interface_name(void *data, guint32 interface_id);
+extern const char *cap_file_get_interface_description(void *data, guint32 interface_id);
 
 #ifdef __cplusplus
 }
@@ -156,4 +156,3 @@ extern const char *cap_file_get_interface_name(void *data, guint32 interface_id)
  * vi: set shiftwidth=2 tabstop=8 expandtab:
  * :indentSize=2:tabSize=8:noTabs=true:
  */
-

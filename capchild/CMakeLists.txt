@@ -30,13 +30,11 @@ set(CLEAN_FILES
 	${CAPCHILD_SRC}
 )
 
-if (WERROR_COMMON_FLAGS)
-	set_source_files_properties(
-		${CLEAN_FILES}
-		PROPERTIES
-		COMPILE_FLAGS ${WERROR_COMMON_FLAGS}
-	)
-endif()
+set_source_files_properties(
+	${CLEAN_FILES}
+	PROPERTIES
+	COMPILE_FLAGS "${WERROR_COMMON_FLAGS}"
+)
 
 file(GLOB CAPCHILD_HEADERS capture_session.h)
 
@@ -45,23 +43,37 @@ add_library(capchild STATIC
 )
 
 set_target_properties(capchild PROPERTIES
+	COMPILE_OPTIONS "${WS_WARNINGS_C_FLAGS}"
 	LINK_FLAGS "${WS_LINK_FLAGS}"
 	FOLDER "Libs")
 
-# include( UseCheckAPI )
-# CHECKAPI(
-# 	NAME
-# 	  capchild-base
-# 	SWITCHES
-# 	  -g deprecated-gtk
-# 	SOURCES
-# 	  ${CAPCHILD_SRC}
-# )
-# CHECKAPI(
-# 	NAME
-# 	  capchild-todo
-# 	SWITCHES
-# 	  -M -g deprecated-gtk-todo
-# 	SOURCES
-# 	  ${CAPCHILD_SRC}
-# )
+include( UseCheckAPI )
+CHECKAPI(
+	NAME
+	  capchild-base
+	SWITCHES
+	  -g deprecated-gtk
+	SOURCES
+	  ${CAPCHILD_SRC}
+)
+CHECKAPI(
+	NAME
+	  capchild-todo
+	SWITCHES
+	  -M -g deprecated-gtk-todo
+	SOURCES
+	  ${CAPCHILD_SRC}
+)
+
+#
+# Editor modelines  -  http://www.wireshark.org/tools/modelines.html
+#
+# Local variables:
+# c-basic-offset: 8
+# tab-width: 8
+# indent-tabs-mode: t
+# End:
+#
+# vi: set shiftwidth=8 tabstop=8 noexpandtab:
+# :indentSize=8:tabSize=8:noTabs=false:
+#

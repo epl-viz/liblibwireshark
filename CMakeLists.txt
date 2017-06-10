@@ -79,6 +79,7 @@ IF(1)
       ${CMAKE_CURRENT_SOURCE_DIR}/extcap_spawn.c
       ${CMAKE_CURRENT_SOURCE_DIR}/capture_opts.c
       ${CMAKE_CURRENT_SOURCE_DIR}/filter_files.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/iface_toolbar.c
       ${CMAKE_CURRENT_SOURCE_DIR}/sync_pipe_write.c
     )
 
@@ -126,7 +127,7 @@ target_link_libraries(${PROJECT_NAME}
     ${Wireshark_LIBRARY}
     wiretap
     wsutil
-    ${GLIB_LIBRARIES}
+    ${GLIB2_LIBRARIES}
     ${PCAP_LIBRARY}
 
   PRIVATE
@@ -136,8 +137,9 @@ target_link_libraries(${PROJECT_NAME}
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(${PROJECT_NAME}
-        "-framework CoreFoundation"
-        "-framework SystemConfiguration"
+        PRIVATE
+            "-framework CoreFoundation"
+            "-framework SystemConfiguration"
     )
 endif()
 
@@ -148,49 +150,49 @@ if( ENABLE_EXAMPLES )
   # 0
   file(GLOB simple_print_src examples/00-simple-print.c)
   add_executable(simple_print ${simple_print_src})
-  target_compile_options(simple_print PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(simple_print ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(simple_print PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(simple_print ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   # 1
   file(GLOB seek_offline_src examples/01-seek-interactive-offline.c)
   add_executable(seek_offline ${seek_offline_src})
-  target_compile_options(seek_offline PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(seek_offline ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(seek_offline PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(seek_offline ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   # 2
   file(GLOB seek_online_src examples/02-seek-interactive-online.c)
   MESSAGE(STATUS ${seek_online_src})
   add_executable(seek_online ${seek_online_src})
-  target_compile_options(seek_online PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(seek_online ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(seek_online PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(seek_online ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   #4
   file(GLOB multiple_print_src examples/04-open-multiple-files.c)
   add_executable(multiple_print ${multiple_print_src})
-  target_compile_options(multiple_print PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(multiple_print ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(multiple_print PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(multiple_print ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   #5
   file(GLOB load_plugin_src examples/05-load-plugin.c)
   add_executable(load_plugin ${load_plugin_src})
-  target_compile_options(load_plugin PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(load_plugin ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(load_plugin PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(load_plugin ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   #6
   file(GLOB stdin_open_src examples/06-stdin-open.c)
   add_executable(stdin_open ${stdin_open_src})
-  target_compile_options(stdin_open PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(stdin_open ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(stdin_open PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(stdin_open ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   #7
   file(GLOB file_types_src examples/07-file-types.c)
   add_executable(file_types ${file_types_src})
-  target_compile_options(file_types PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(file_types ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(file_types PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(file_types ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   #8
   file(GLOB uat_src examples/08-use-uat.c)
   add_executable(uat ${uat_src})
-  target_compile_options(uat PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(uat ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(uat PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(uat ${PROJECT_NAME} ${GLIB2_LIBRARIES})
   #9
   file(GLOB online_src examples/09-online-print.c)
   add_executable(online ${online_src})
-  target_compile_options(online PUBLIC ${GLIB_CFLAGS_OTHER})
-  target_link_libraries(online ${PROJECT_NAME} ${GLIB_LIBRARIES})
+  target_compile_options(online PUBLIC ${GLIB2_CFLAGS_OTHER})
+  target_link_libraries(online ${PROJECT_NAME} ${GLIB2_LIBRARIES})
 
   set( EXAMPLE_INSTALL_TARGETS simple_print seek_offline seek_online multiple_print load_plugin
       stdin_open

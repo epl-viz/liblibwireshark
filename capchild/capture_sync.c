@@ -31,6 +31,8 @@
 
 #include <signal.h>
 
+#include <wsutil/strtoi.h>
+
 #ifdef _WIN32
 #include <wsutil/unicode-utils.h>
 #include <wsutil/win32-utils.h>
@@ -89,7 +91,7 @@
 
 #include <wsutil/filesystem.h>
 #include <wsutil/file_util.h>
-#include <wsutil/report_err.h>
+#include <wsutil/report_message.h>
 #ifdef HAVE_EXTCAP
 #include "extcap.h"
 #endif
@@ -341,7 +343,7 @@ sync_pipe_start(capture_options *capture_opts, capture_session *cap_session, inf
             argv = sync_pipe_add_arg(argv, &argc, "-f");
             argv = sync_pipe_add_arg(argv, &argc, interface_opts.cfilter);
         }
-        if (interface_opts.snaplen != WTAP_MAX_PACKET_SIZE) {
+        if (interface_opts.has_snaplen) {
             argv = sync_pipe_add_arg(argv, &argc, "-s");
             g_snprintf(ssnap, ARGV_NUMBER_LEN, "%d", interface_opts.snaplen);
             argv = sync_pipe_add_arg(argv, &argc, ssnap);
@@ -1187,8 +1189,12 @@ sync_interface_set_80211_chan(const gchar *iface, const char *freq, const gchar 
     argv = sync_pipe_add_arg(argv, &argc, "-i");
     argv = sync_pipe_add_arg(argv, &argc, iface);
 
-    if (type)
+    if (center_freq2)
         opt = g_strdup_printf("%s,%s,%s,%s", freq, type, center_freq1, center_freq2);
+    else if (center_freq1)
+        opt = g_strdup_printf("%s,%s,%s", freq, type, center_freq1);
+    else if (type)
+        opt = g_strdup_printf("%s,%s", freq, type);
     else
         opt = g_strdup(freq);
 
@@ -1687,7 +1693,7 @@ sync_pipe_input_cb(gint source, gpointer user_data)
     int  secondary_len;
     char *secondary_msg;
     char *wait_msg, *combined_msg;
-    int npackets;
+    guint32 npackets = 0;
 
     nread = pipe_read_block(source, &indicator, SP_MAX_MSG_LEN, buffer,
                             &primary_msg);
@@ -1768,7 +1774,9 @@ sync_pipe_input_cb(gint source, gpointer user_data)
         }
         break;
     case SP_PACKET_COUNT:
-        npackets = atoi(buffer);
+        if (!ws_strtou32(buffer, NULL, &npackets)) {
+            g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_WARNING, "Invalid packets number: %s", buffer);
+        }
         g_log(LOG_DOMAIN_CAPTURE, G_LOG_LEVEL_DEBUG, "sync_pipe_input_cb: new packets %u", npackets);
         cap_session->count += npackets;
         capture_input_new_packets(cap_session, npackets);

@@ -7,6 +7,7 @@
 #include <epan/epan-int.h>
 #include <wsutil/nstime.h>
 #include <wsutil/privileges.h>
+#include "file.h"
 #include <frame_tvbuff.h>
 #include <assert.h>
 #include <stdio.h>
@@ -36,7 +37,7 @@ gboolean ws_dissect_plugin_dir(const char *dir) {
 
 int ws_dissect_init(void) {
     epan_register_plugin_types(); /* Types known to libwireshark */
-    scan_plugins(/*REPORT_LOAD_FAILURE*/);
+    scan_plugins(REPORT_LOAD_FAILURE);
     if (!epan_init(register_all_protocols, register_all_protocol_handoffs, NULL, NULL)) {
         /*fprintf(stderr, "Error at epan_init\n");*/
         return 2;
@@ -196,7 +197,7 @@ char *ws_dissect_tostr(struct ws_dissection *dissection, char **buf) {
     print_args.print_hex         = FALSE;
     print_args.print_dissections = print_dissections_expanded;
 
-    proto_tree_print(&print_args, dissection->edt, NULL, print_stream);
+    proto_tree_print(print_args.print_dissections, TRUE, dissection->edt, NULL, print_stream);
 
     *buf = g_string_free(gstr, FALSE);
 
