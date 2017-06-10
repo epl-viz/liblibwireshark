@@ -1,10 +1,12 @@
 #### Wrapper for libwireshark
 
+[![Build Status](https://travis-ci.org/epl-viz/liblibwireshark.svg?branch=master)](https://travis-ci.org/epl-viz/liblibwireshark)
+
 As libwireshark is not public API, it is prone to change and break non-official tools depending on it.
 This project aims to provide a thin frequently-updated wrapper around the core capture/dissect functionality that other applications can then link against.
 
 
-Tested working with Wireshark `v2.4.0` on macOS Sierra.
+Tested working with Wireshark `v2.4.0` on macOS Sierra
 
 #### Usage
 
