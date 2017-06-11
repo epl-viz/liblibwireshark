@@ -197,10 +197,10 @@ extcap_find_interface_for_ifname(const gchar *ifname)
     GList * walker = element->interfaces;
     while ( walker && walker->data && ! result )
     {
-        extcap_interface * interface = (extcap_interface *)walker->data;
-        if ( g_strcmp0(interface->call, ifname) == 0 )
+        extcap_interface * my_interface = (extcap_interface *)walker->data;
+        if ( g_strcmp0(my_interface->call, ifname) == 0 )
         {
-            result = interface;
+            result = my_interface;
             break;
         }
 
@@ -276,8 +276,8 @@ extcap_if_exists_for_extcap(const gchar *ifname, const gchar *extcap)
 static gchar *
 extcap_if_executable(const gchar *ifname)
 {
-    extcap_interface *interface = extcap_find_interface_for_ifname(ifname);
-    return interface != NULL ? interface->extcap_path : NULL;
+    extcap_interface *my_interface = extcap_find_interface_for_ifname(ifname);
+    return my_interface != NULL ? my_interface->extcap_path : NULL;
 }
 
 static void
@@ -465,19 +465,19 @@ extcap_get_if_dlts(const gchar *ifname, char **err_str)
 static void extcap_free_interface(gpointer i)
 {
 
-    extcap_interface *interface = (extcap_interface *)i;
+    extcap_interface *my_interface = (extcap_interface *)i;
 
     if (i == NULL)
     {
         return;
     }
 
-    g_free(interface->call);
-    g_free(interface->display);
-    g_free(interface->version);
-    g_free(interface->help);
-    g_free(interface->extcap_path);
-    g_free(interface);
+    g_free(my_interface->call);
+    g_free(my_interface->display);
+    g_free(my_interface->version);
+    g_free(my_interface->help);
+    g_free(my_interface->extcap_path);
+    g_free(my_interface);
 }
 
 static void extcap_free_interfaces(GList *interfaces)
@@ -509,8 +509,8 @@ if_info_compare(gconstpointer a, gconstpointer b)
 gchar *
 extcap_get_help_for_ifname(const char *ifname)
 {
-    extcap_interface *interface = extcap_find_interface_for_ifname(ifname);
-    return interface != NULL ? interface->help : NULL;
+    extcap_interface *my_interface = extcap_find_interface_for_ifname(ifname);
+    return my_interface != NULL ? my_interface->help : NULL;
 }
 
 GList *

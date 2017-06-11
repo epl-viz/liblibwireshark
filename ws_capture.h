@@ -63,7 +63,7 @@ enum { WS_CAPTURE_FLAG_MONITOR_MODE = 1 };
  *
  * \brief Starts sniffing on a network interface or NULL on failure
  */
-ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_capture_callback *callbacks, int *err, char **err_info);
+ws_capture_t *ws_capture_open_live(const char *interface_str, int flags, struct ws_capture_callback *callbacks, int *err, char **err_info);
 
 
 /**

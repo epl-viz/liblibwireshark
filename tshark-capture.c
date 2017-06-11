@@ -7,7 +7,6 @@
 #include "capchild/capture_sync.h"
 #include <epan/epan.h>
 #include <epan/epan-int.h>
-#include <unistd.h>
 #include <glib.h>
 #include <log.h>
 #include <file.h>
@@ -20,7 +19,12 @@
 #include <epan/epan_dissect.h>
 #include <capture_info.h>
 
-#define CAPTURE_OF(session) container_of(session->cf, ws_capture_t, cfile)
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#define CAPTURE_OF(session) ((ws_capture_t*)((char*)(session)->cf - offsetof(ws_capture_t, cfile)))
+//#define CAPTURE_OF(session) container_of(session->cf, ws_capture_t, cfile)
 
 #define CAPTURE_CALLBACK(session, func, ...) do {                           \
     ws_capture_t *_ws = CAPTURE_OF(session);                                  \
@@ -465,10 +469,10 @@ pipe_input_set_handler(gint source, gpointer user_data, ws_process_id *child_pro
 
 #ifdef _WIN32
 #if GLIB_CHECK_VERSION(2,31,0)
-  pipe_input.callback_running = g_malloc(sizeof(GMutex));
-  g_mutex_init(pipe_input.callback_running);
+  pipe_input->callback_running = g_malloc(sizeof(GMutex));
+  g_mutex_init(pipe_input->callback_running);
 #else
-  pipe_input.callback_running = g_mutex_new();
+  pipe_input->callback_running = g_mutex_new();
 #endif
   /* Tricky to use pipes in win9x, as no concept of wait.  NT can
      do this but that doesn't cover all win32 platforms.  GTK can do
@@ -476,7 +480,7 @@ pipe_input_set_handler(gint source, gpointer user_data, ws_process_id *child_pro
      something similar here, start a timer and check for data on every
      timeout. */
   /*g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_input_set_handler: new");*/
-  pipe_input.pipe_input_id = g_timeout_add(200, pipe_timer_cb, &pipe_input);
+  pipe_input->pipe_input_id = g_timeout_add(200, pipe_timer_cb, pipe_input);
 #endif
 }
 

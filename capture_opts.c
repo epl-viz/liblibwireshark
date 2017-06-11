@@ -26,6 +26,8 @@
 
 #include <config.h>
 
+#define WTAP_MAX_PACKET_SIZE 65536
+
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -17,7 +17,9 @@
 #include <epan/epan-int.h>
 #include <capture_info.h>
 #include <errno.h>
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
 #include <glib.h>
 /**
  * capchild deps:
@@ -74,7 +76,7 @@
 
 epan_t *
 tshark_epan_new(capture_file *cf);
-ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_capture_callback *cb, int *err, char **err_info) {
+ws_capture_t *ws_capture_open_live(const char *interface_name, int flags, struct ws_capture_callback *cb, int *err, char **err_info) {
     int _err = 0;
     char *_err_info = NULL;
     /*if ((flags & WS_CAPTURE_SEQUENTIAL) == WS_CAPTURE_SEQUENTIAL) {*/
@@ -93,8 +95,8 @@ ws_capture_t *ws_capture_open_live(const char *interface, int flags, struct ws_c
     }
 
     capture_opts_init(&cap->dumpcap->opts);
-    if (interface)
-        CAPTURE_OPT(cap->dumpcap->opts, 'i', interface, "Invalid interface specified");
+    if (interface_name)
+        CAPTURE_OPT(cap->dumpcap->opts, 'i', interface_name, "Invalid interface specified");
     if (flags & WS_CAPTURE_FLAG_MONITOR_MODE)
         CAPTURE_OPT(cap->dumpcap->opts, 'I', NULL, "Invalid option specified");
 

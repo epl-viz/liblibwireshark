@@ -216,7 +216,7 @@ void ws_dissect_free(ws_dissect_t *handle) {
     g_free(handle);
 }
 
-char *ws_nstime_tostr(char iso8601[restrict static WS_ISO8601_LEN], unsigned precision, const nstime_t * restrict nst) {
+char *ws_nstime_tostr(char iso8601[WS_ISO8601_LEN], unsigned precision, const nstime_t * nst) {
     struct tm tm;
     if (!gmtime_r(&nst->secs, &tm))
         return memcpy(iso8601, "Error: Year overflow", sizeof "Error: Year overflow");

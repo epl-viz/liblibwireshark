@@ -1,15 +1,13 @@
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#if _WIN32
 #include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <Windows.h>
 #endif
 
 #ifndef LIBLIBWIRESHARK_CONFIG_H_
 #define LIBLIBWIRESHARK_CONFIG_H_
 
 #define WTAP_MAX_PACKET_SIZE 65536
-
-#define container_of(ptr, type, member) ({                      \
-        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-        (type *)( (char *)__mptr - offsetof(type,member) );})
 
 #ifdef __GNUC__
 #define _U_ __attribute__((unused))
