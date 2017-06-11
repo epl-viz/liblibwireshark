@@ -44,6 +44,9 @@ struct ws_capture_t {
             ws_process_id   *child_process;
             pipe_input_cb_t  input_cb;
             guint            pipe_input_id;
+#ifdef _WIN32
+            GMutex          *callback_running;
+#endif
         } pipe_input;
     } dumpcap[];
 };

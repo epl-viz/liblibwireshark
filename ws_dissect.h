@@ -1,12 +1,17 @@
 #ifndef LIBLIBWIRESHARK_WS_DISSECT_H_
 #define LIBLIBWIRESHARK_WS_DISSECT_H_
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#include <WinSock2.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#define gmtime_r(ptime,ptm) (gmtime_s((ptm),(ptime)), (ptm))
+#else
+#include <sys/time.h>
 #endif
 
 #include "ws_capture.h"
@@ -17,15 +22,6 @@ extern "C" {
 #include <glib.h>
 #include <time.h>
 #include <string.h>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <winsock2.h>
-#define gmtime_r(ptime,ptm) (gmtime_s((ptm),(ptime)), (ptm))
-#else
-#include <sys/time.h>
-#endif
 
 #if defined(__STDC__) && __STDC_VERSION__ >= 199901L
 #define WS_IF_C99(x) x

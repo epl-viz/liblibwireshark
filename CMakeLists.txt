@@ -10,6 +10,10 @@ set( CM_VERSION_MAJOR    0 )
 set( CM_VERSION_MINOR    0 )
 set( CM_VERSION_SUBMINOR 2 )
 
+IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/private.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/private.cmake)
+ENDIF()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR})
 
 set(CMAKE_C_STANDARD 11)
@@ -53,9 +57,6 @@ include_directories( SYSTEM ${Wireshark_INCLUDE_DIR} ${GLIB2_INCLUDE_DIRS} ${PCA
 include_directories(        ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include )
 link_directories( ${Wireshark_LIB_DIR} )
 
-IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/private.cmake)
-    include(${CMAKE_CURRENT_LIST_DIR}/private.cmake)
-ENDIF()
 
 
 set(CMAKE_MACOSX_RPATH 1)

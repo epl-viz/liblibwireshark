@@ -393,6 +393,67 @@ capture_input_new_packets(capture_session *cap_session, int to_read)
     CAPTURE_CALLBACK(cap_session, input_new_packets, to_read);
 }
 
+#ifdef _WIN32
+/* The timer has expired, see if there's stuff to read from the pipe,
+   if so, do the callback */
+static gint
+pipe_timer_cb(gpointer data)
+{
+  HANDLE        handle;
+  DWORD         avail        = 0;
+  gboolean      result;
+  DWORD         childstatus;
+  pipe_input_t *pipe_input_p = data;
+  gint          iterations   = 0;
+
+  g_mutex_lock (pipe_input_p->callback_running);
+
+  /* try to read data from the pipe only 5 times, to avoid blocking */
+  while(iterations < 5) {
+    /*g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_timer_cb: new iteration");*/
+
+    /* Oddly enough although Named pipes don't work on win9x,
+       PeekNamedPipe does !!! */
+    handle = (HANDLE) _get_osfhandle (pipe_input_p->source);
+    result = PeekNamedPipe(handle, NULL, 0, NULL, &avail, NULL);
+
+    /* Get the child process exit status */
+    GetExitCodeProcess((HANDLE)*(pipe_input_p->child_process),
+                       &childstatus);
+
+    /* If the Peek returned an error, or there are bytes to be read
+       or the childwatcher thread has terminated then call the normal
+       callback */
+    if (!result || avail > 0 || childstatus != STILL_ACTIVE) {
+
+      /*g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_timer_cb: data avail");*/
+
+      /* And call the real handler */
+      if (!pipe_input_p->input_cb(pipe_input_p->source, pipe_input_p->user_data)) {
+        g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_timer_cb: input pipe closed, iterations: %u", iterations);
+        /* pipe closed, return false so that the timer is stopped */
+        g_mutex_unlock (pipe_input_p->callback_running);
+        return FALSE;
+      }
+    }
+    else {
+      /*g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_timer_cb: no data avail");*/
+      /* No data, stop now */
+      break;
+    }
+
+    iterations++;
+  }
+
+  /*g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_timer_cb: finished with iterations: %u, new timer", iterations);*/
+
+  g_mutex_unlock (pipe_input_p->callback_running);
+
+  /* we didn't stopped the timer, so let it run */
+  return TRUE;
+}
+#endif
+
 void
 pipe_input_set_handler(gint source, gpointer user_data, ws_process_id *child_process, pipe_input_cb_t input_cb)
 {
@@ -402,5 +463,20 @@ pipe_input_set_handler(gint source, gpointer user_data, ws_process_id *child_pro
     pipe_input->user_data      = user_data;
     pipe_input->input_cb       = input_cb;
 
+#ifdef _WIN32
+#if GLIB_CHECK_VERSION(2,31,0)
+  pipe_input.callback_running = g_malloc(sizeof(GMutex));
+  g_mutex_init(pipe_input.callback_running);
+#else
+  pipe_input.callback_running = g_mutex_new();
+#endif
+  /* Tricky to use pipes in win9x, as no concept of wait.  NT can
+     do this but that doesn't cover all win32 platforms.  GTK can do
+     this but doesn't seem to work over processes.  Attempt to do
+     something similar here, start a timer and check for data on every
+     timeout. */
+  /*g_log(NULL, G_LOG_LEVEL_DEBUG, "pipe_input_set_handler: new");*/
+  pipe_input.pipe_input_id = g_timeout_add(200, pipe_timer_cb, &pipe_input);
+#endif
 }
 

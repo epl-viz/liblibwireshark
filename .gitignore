@@ -1,4 +1,5 @@
 CMakeCache.txt
+winbuild/
 CMakeFiles
 CMakeScripts
 cmake_install.cmake
