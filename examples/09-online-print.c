@@ -4,16 +4,17 @@
 #include <assert.h>
 #include <epan/proto.h>
 #include <epan/print.h>
-#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <capchild/capture_session.h>
 
+#ifdef _WIN32
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
 #include "defs.h"
 
@@ -25,12 +26,15 @@ static void print_usage(char *argv[]) {
 
 int main(int argc, char *argv[]) {
 #ifdef __APPLE__
-    char           *interface   = "en0";
+    char           *interface_name   = "en0";
 #elif defined(__unix__)
-    char           *interface   = "eth0";
+    char           *interface_name   = "eth0";
 #else
-    char           *interface   = NULL;
+    char           *interface_name   = NULL;
 #endif
+#ifdef _WIN32
+    puts("Capturing yet to be tested on Windows");
+#else
 
     int             opt;
 
@@ -61,9 +65,10 @@ int main(int argc, char *argv[]) {
                 if_info_t *if_info = (if_info_t*)if_list->data;
 
                 printf("%s: %s%s, %s\nAddresses: (\n",
-                        if_info->name ?:"", if_info->friendly_name ?:"",
+                        if_info->name ? if_info->name : "",
+                        if_info->friendly_name ? if_info->friendly_name : "",
                         if_info->loopback ? " (loopback)" : "",
-                        if_info->vendor_description ?:"");
+                        if_info->vendor_description ? if_info->vendor_description : "");
 
                 for (GSList *node = if_info->addrs; node; node = node->next) {
                     if_addr_t *if_addr = (if_addr_t*)node->data;
@@ -87,7 +92,7 @@ int main(int argc, char *argv[]) {
             free_interface_list(if_list);
             return 0;
             case 'i':
-            interface = optarg;
+            interface_name = optarg;
             break;
             default: print_usage(argv); return 1;
         }
@@ -95,7 +100,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    ws_capture_t *cap = ws_capture_open_live(interface, 0, NULL, &err_code, &err_info);
+    ws_capture_t *cap = ws_capture_open_live(interface_name, 0, NULL, &err_code, &err_info);
     my_assert(cap, "Error %d: %s\n", err_code, err_info);
 
     ws_dissect_t *dissector = ws_dissect_capture(cap);
@@ -110,6 +115,7 @@ int main(int argc, char *argv[]) {
 
     ws_dissect_finalize();
     ws_capture_finalize();
+#endif
     return 0;
 }
 

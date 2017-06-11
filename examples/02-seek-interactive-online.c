@@ -4,10 +4,8 @@
 #include <assert.h>
 #include <epan/proto.h>
 #include <epan/print.h>
-#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include <signal.h>
