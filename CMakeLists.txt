@@ -26,7 +26,10 @@ endif(WIN32)
 
 if( WIRESHARK_BASE_DIR )
   set( ENV{WIRESHARK_BASE_DIR} "${WIRESHARK_BASE_DIR}" )
-  set( ENV{WIRESHARK_LIB_DIR}  "${WIRESHARK_BASE_DIR}/wireshark-${WIRESHARK_TARGET_PLATFORM}-libs" )
+  set( ENV{WIRESHARK_LIB_DIR}  "${WIRESHARK_BASE_DIR}/wireshark-${WIRESHARK_TARGET_PLATFORM}-libs-2.4" )
+  if( NOT EXISTS "$ENV{WIRESHARK_LIB_DIR}" )
+	set( ENV{WIRESHARK_LIB_DIR}  "${WIRESHARK_BASE_DIR}/wireshark-${WIRESHARK_TARGET_PLATFORM}-libs" )
+  endif( NOT EXISTS "$ENV{WIRESHARK_LIB_DIR}" )
 endif( WIRESHARK_BASE_DIR )
 
 include( CMakePackageConfigHelpers )
@@ -49,6 +52,7 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 
 find_package( Wireshark REQUIRED )
 find_package( GLIB2     REQUIRED )
+find_package( GMODULE2  REQUIRED )
 find_package( PCAP      REQUIRED )
 
 message( STATUS "Wireshark version:     ${Wireshark_VERSION_STRING}" )
@@ -140,6 +144,7 @@ target_link_libraries(${PROJECT_NAME}
     wsutil
     ${GLIB2_LIBRARIES}
     ${PCAP_LIBRARY}
+	${GMODULE2_LIBRARIES}
 
   PRIVATE
     capchild
