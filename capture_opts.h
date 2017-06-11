@@ -30,6 +30,10 @@
 #ifndef __CAPTURE_OPTS_H__
 #define __CAPTURE_OPTS_H__
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>     /* for gid_t */
 #endif

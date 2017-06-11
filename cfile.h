@@ -23,6 +23,10 @@
 #ifndef __CFILE_H__
 #define __CFILE_H__
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #include <epan/epan.h>
 #include <epan/column-info.h>
 #include <epan/dfilter/dfilter.h>

@@ -1,6 +1,10 @@
 #ifndef LIBLIBWIRESHARK_CAPTURE_INTERNAL_H_
 #define LIBLIBWIRESHARK_CAPTURE_INTERNAL_H_
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #include "cfile.h"
 #include "ws_capture.h"
 #include "capchild/capture_session.h"

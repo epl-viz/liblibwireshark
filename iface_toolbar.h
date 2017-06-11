@@ -22,6 +22,9 @@
 #ifndef __IFACE_TOOLBAR_H__
 #define __IFACE_TOOLBAR_H__
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
 #include "config.h"
 
 #ifdef __cplusplus

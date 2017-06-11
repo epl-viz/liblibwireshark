@@ -1,3 +1,7 @@
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #ifndef LIBLIBWIRESHARK_CONFIG_H_
 #define LIBLIBWIRESHARK_CONFIG_H_
 
@@ -13,7 +17,7 @@
 #define _U_
 #endif
 
-#if WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 
 /* cmakeconfig.h.in */
 

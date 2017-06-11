@@ -1,3 +1,7 @@
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #include "ws_capture.h"
 #include <stddef.h>
 #include <assert.h>

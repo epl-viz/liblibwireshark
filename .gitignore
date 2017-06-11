@@ -13,3 +13,5 @@ private.cmake
 *.o
 *.a
 
+/.vs
+/CMakeSettings.json

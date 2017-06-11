@@ -1,6 +1,10 @@
 #ifndef LIBLIBWIRESHARK_WS_DISSECT_H_
 #define LIBLIBWIRESHARK_WS_DISSECT_H_
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

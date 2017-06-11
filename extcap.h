@@ -24,6 +24,10 @@
 #ifndef __EXTCAP_H__
 #define __EXTCAP_H__
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #include <config.h>
 
 #include <glib.h>

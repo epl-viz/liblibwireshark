@@ -23,6 +23,10 @@
 #ifndef __FRAME_TVBUFF_H__
 #define __FRAME_TVBUFF_H__
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <WinSock2.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
