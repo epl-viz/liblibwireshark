@@ -24,7 +24,7 @@
 #include <WinSock2.h>
 #endif
 
-#include <config.h>
+#include "config.h"
 
 #define WTAP_MAX_PACKET_SIZE 65536
 

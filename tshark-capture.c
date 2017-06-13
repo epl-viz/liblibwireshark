@@ -36,7 +36,7 @@
 /* XXX racy */
 pipe_input_t *pipe_input;
 
-#include <cfile.h>
+#include "cfile.h"
 // FIXME we don't use dfilter
 #include <epan/dfilter/dfilter.h>
 #define cmdarg_err(...) do { \

@@ -23,10 +23,6 @@
 #ifndef __CFILE_H__
 #define __CFILE_H__
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#include <WinSock2.h>
-#endif
-
 #include <epan/epan.h>
 #include <epan/column-info.h>
 #include <epan/dfilter/dfilter.h>
@@ -91,7 +87,8 @@ typedef struct _capture_file {
   gboolean     drops_known;          /* TRUE if we know how many packets were dropped */
   guint32      drops;                /* Dropped packets */
   nstime_t     elapsed_time;         /* Elapsed time */
-  int          snap;                 /* Maximum captured packet length; 0 if unknown */
+  gboolean     has_snap;             /* TRUE if maximum capture packet length is known */
+  int          snap;                 /* Maximum captured packet length */
   wtap        *wth;                  /* Wiretap session */
   dfilter_t   *rfcode;               /* Compiled read filter program */
   dfilter_t   *dfcode;               /* Compiled display filter program */
@@ -124,9 +121,7 @@ typedef struct _capture_file {
   gint         current_row;          /* Row number for current frame */
   epan_dissect_t *edt;               /* Protocol dissection for currently selected packet */
   field_info  *finfo_selected;       /* Field info for currently selected field */
-#ifdef WANT_PACKET_EDITOR
-  GTree       *edited_frames;        /* BST with modified frames */
-#endif
+
   gpointer     window;               /* Top-level window associated with file */
   GTree       *frames_user_comments; /* BST with user comments for frames (key = frame_data) */
   gulong       computed_elapsed;
