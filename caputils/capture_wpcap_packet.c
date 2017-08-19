@@ -30,7 +30,7 @@
 #include <glib.h>
 #include <gmodule.h>
 
-#include <pcap.h>
+#include <wsutil/wspcap.h>
 
 /* XXX - yes, I know, I should move cppmagic.h to a generic location. */
 #include "tools/lemon/cppmagic.h"

@@ -26,7 +26,7 @@
 
 #ifdef HAVE_LIBPCAP
 
-#include <pcap.h>
+#include <wsutil/wspcap.h>
 
 #ifdef __APPLE__
 #include <dlfcn.h>
@@ -159,10 +159,9 @@ get_interface_list(int *err, char **err_str)
 	lastlen = 0;
 	len = 100 * sizeof(struct ifreq);
 	for ( ; ; ) {
-		buf = (char *)g_malloc(len);
+		buf = (char *)g_malloc0(len);
 		ifc.ifc_len = len;
 		ifc.ifc_buf = buf;
-		memset (buf, 0, len);
 		if (ioctl(sock, SIOCGIFCONF, &ifc) < 0) {
 			if (errno != EINVAL || lastlen != 0) {
 				if (err_str != NULL) {
@@ -211,6 +210,9 @@ get_interface_list(int *err, char **err_str)
 		g_list_foreach(il, search_for_if_cb, &user_data);
 		if (user_data.if_info != NULL) {
 			if_info_add_address(user_data.if_info, &ifr->ifr_addr);
+			if (user_data.if_info->addrs) {
+				g_slist_reverse(user_data.if_info->addrs);
+			}
 			goto next;
 		}
 
@@ -260,6 +262,9 @@ get_interface_list(int *err, char **err_str)
 		    strncmp(ifr->ifr_name, "lo", 2) == 0);
 		if_info = if_info_new(ifr->ifr_name, NULL, loopback);
 		if_info_add_address(if_info, &ifr->ifr_addr);
+		if (if_info->addrs) {
+			g_slist_reverse(if_info->addrs);
+		}
 		if (loopback)
 			il = g_list_append(il, if_info);
 		else {
@@ -351,14 +356,14 @@ request_high_resolution_timestamp(pcap_t *pcap_h)
 {
 #ifdef __APPLE__
 	/*
-	 * On OS X, if you build with a newer SDK, pcap_set_tstamp_precision()
+	 * On macOS, if you build with a newer SDK, pcap_set_tstamp_precision()
 	 * is available, so the code will be built with it.
 	 *
 	 * However, if you then try to run on an older release that
 	 * doesn't have pcap_set_tstamp_precision(), the dynamic linker
 	 * will fail, as it won't find pcap_set_tstamp_precision().
 	 *
-	 * libpcap doesn't use OS X "weak linking" for new routines,
+	 * libpcap doesn't use macOS "weak linking" for new routines,
 	 * so we can't just check whether a pointer to
 	 * pcap_set_tstamp_precision() is null and, if it is, not
 	 * call it.  We have to, instead, use dlopen() to load
@@ -433,7 +438,11 @@ get_if_capabilities_local(interface_options *interface_opts, char **err_str)
 }
 
 pcap_t *
-open_capture_device_local(capture_options *capture_opts,
+open_capture_device_local(capture_options *capture_opts
+#ifndef HAVE_PCAP_CREATE
+	_U_
+#endif
+	,
     interface_options *interface_opts, int timeout,
     char (*open_err_str)[PCAP_ERRBUF_SIZE])
 {
@@ -479,6 +488,12 @@ get_compiled_caplibs_version(GString *str)
 	 * of libpcap with which we were compiled.
 	 */
 	g_string_append(str, "with libpcap");
+#ifdef HAVE_PCAP_REMOTE
+	/*
+	 * We have remote pcap support in libpcap.
+	 */
+	g_string_append(str, " (including remote capture support)");
+#endif
 
 	/*
 	 * XXX - these libraries are actually used only by dumpcap,

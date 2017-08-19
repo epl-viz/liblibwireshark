@@ -52,13 +52,11 @@ set(CLEAN_FILES
 	${CAPUTILS_SRC}
 )
 
-if (WERROR_COMMON_FLAGS)
-	set_source_files_properties(
-		${CLEAN_FILES}
-		PROPERTIES
-		COMPILE_FLAGS ${WERROR_COMMON_FLAGS}
-	)
-endif()
+set_source_files_properties(
+	${CLEAN_FILES}
+	PROPERTIES
+	COMPILE_FLAGS "${WERROR_COMMON_FLAGS}"
+)
 
 
 add_library(caputils STATIC
@@ -66,22 +64,19 @@ add_library(caputils STATIC
 )
 
 set_target_properties(caputils PROPERTIES
+	COMPILE_OPTIONS "${WS_WARNINGS_C_FLAGS}"
 	LINK_FLAGS "${WS_LINK_FLAGS}"
 	FOLDER "Libs")
 
-# CHECKAPI(
-# 	NAME
-# 	  caputils-base
-# 	SWITCHES
-# 	  -g deprecated-gtk
-# 	SOURCES
-# 	  ${CAPUTILS_SRC}
-# )
-# CHECKAPI(
-# 	NAME
-# 	  caputils-todo
-# 	SWITCHES
-# 	  -M -g deprecated-gtk-todo
-# 	SOURCES
-# 	  ${CAPUTILS_SRC}
-# )
+#
+# Editor modelines  -  http://www.wireshark.org/tools/modelines.html
+#
+# Local variables:
+# c-basic-offset: 8
+# tab-width: 8
+# indent-tabs-mode: t
+# End:
+#
+# vi: set shiftwidth=8 tabstop=8 noexpandtab:
+# :indentSize=8:tabSize=8:noTabs=false:
+#

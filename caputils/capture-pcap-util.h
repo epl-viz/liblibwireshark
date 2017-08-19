@@ -29,7 +29,7 @@ extern "C" {
 
 #ifdef HAVE_LIBPCAP
 
-#include <pcap.h>
+#include <wsutil/wspcap.h>
 
 #include "capture_opts.h"
 

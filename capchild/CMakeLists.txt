@@ -47,7 +47,6 @@ set_target_properties(capchild PROPERTIES
 	LINK_FLAGS "${WS_LINK_FLAGS}"
 	FOLDER "Libs")
 
-
 #
 # Editor modelines  -  http://www.wireshark.org/tools/modelines.html
 #
