@@ -51,7 +51,14 @@ struct ws_capture_callback {
  */
 ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, char **err_info);
 
-enum { WS_CAPTURE_FLAG_MONITOR_MODE = 1 };
+enum {
+    WS_CAPTURE_FLAG_MONITOR_MODE = 1,
+    WS_CAPTURE_TSTAMP_HOST = 2, WS_CAPTURE_TSTAMP_HOST_LOWPREC = 4, WS_CAPTURE_TSTAMP_HOST_HIPREC = 8,
+    WS_CAPTURE_TSTAMP_ADAPTER = 16, WS_CAPTURE_TSTAMP_ADAPTER_UNSYNCED = 32
+};
+
+#define WS_CAPTURE_TSTAMP_BITMASK (WS_CAPTURE_TSTAMP_HOST | WS_CAPTURE_TSTAMP_HOST_LOWPREC | WS_CAPTURE_TSTAMP_HOST_HIPREC | \
+    WS_CAPTURE_TSTAMP_ADAPTER | WS_CAPTURE_TSTAMP_ADAPTER_UNSYNCED )
 
 /**
  * \param interface name retrieved with \sa ws_capture_list_interfaces
@@ -102,6 +109,14 @@ void ws_capture_close(ws_capture_t *capture);
  * \brief free "static" capture helper data
  */
 void ws_capture_finalize(void);
+
+
+/**
+ * \brief Set Timestamping method. e.g. "host" for default
+ *        or "adapter_unsynced" for hardware timestamps
+ * \see PCAP_SET_TSTAMP_TYPE(3PCAP)
+ */
+void ws_capture_set_tstamp_type(const char *type);
 
 #ifdef __cplusplus
 }

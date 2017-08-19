@@ -36,7 +36,11 @@ int main(int argc, char *argv[]) {
 
     ws_capture_init();
     ws_dissect_init();
-    ws_capture_t *cap = ws_capture_open_live(NULL, 0, NULL, &err_code, &err_info);
+    /*
+     * WS_CAPTURE_TSTAMP_ADAPTER_UNSYNCED will be ignored if the NIC/PCAP/Kernel don't support it
+     * Use dumpcap --list-time-stamps to find values which have an effect
+     */
+    ws_capture_t *cap = ws_capture_open_live(NULL, WS_CAPTURE_TSTAMP_ADAPTER_UNSYNCED, NULL, &err_code, &err_info);
     my_assert(cap, "Error %d: %s\n", err_code, err_info);
 
     ws_dissect_t *dissector = ws_dissect_capture(cap);

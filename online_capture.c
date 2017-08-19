@@ -79,7 +79,22 @@ tshark_epan_new(capture_file *cf);
 ws_capture_t *ws_capture_open_live(const char *interface_name, int flags, struct ws_capture_callback *cb, int *err, char **err_info) {
     int _err = 0;
     char *_err_info = NULL;
+
+    const char *tstamp_type = NULL;
     /*if ((flags & WS_CAPTURE_SEQUENTIAL) == WS_CAPTURE_SEQUENTIAL) {*/
+
+    switch(flags & WS_CAPTURE_TSTAMP_BITMASK) {
+        case WS_CAPTURE_TSTAMP_HOST:             tstamp_type = "host"; break;
+        case WS_CAPTURE_TSTAMP_HOST_LOWPREC:     tstamp_type = "host_lowprec"; break;
+        case WS_CAPTURE_TSTAMP_HOST_HIPREC:      tstamp_type = "host_hiprec"; break;
+        case WS_CAPTURE_TSTAMP_ADAPTER:          tstamp_type = "adapter"; break; 
+        case WS_CAPTURE_TSTAMP_ADAPTER_UNSYNCED: tstamp_type = "adapter_unsynced"; break;
+        default:
+            _err = __LINE__;
+            _err_info = strdup("Can't specify multiple CAPTURE_TSTAMP_ types");
+            PROVIDE_ERRORS;
+            return NULL;
+    }
 
     ws_capture_t *cap = g_malloc0(sizeof *cap + sizeof *cap->dumpcap);
 
@@ -99,6 +114,8 @@ ws_capture_t *ws_capture_open_live(const char *interface_name, int flags, struct
         CAPTURE_OPT(cap->dumpcap->opts, 'i', interface_name, "Invalid interface specified");
     if (flags & WS_CAPTURE_FLAG_MONITOR_MODE)
         CAPTURE_OPT(cap->dumpcap->opts, 'I', NULL, "Invalid option specified");
+    if (tstamp_type)
+        CAPTURE_OPT(cap->dumpcap->opts, LONGOPT_SET_TSTAMP_TYPE, tstamp_type, "Invalid timestamp type specified");
 
     capture_session_init(&cap->dumpcap->session, &cap->cfile);
 
