@@ -15,4 +15,8 @@ private.cmake
 *.a
 
 /.vs
-/CMakeSettings.json
+CMakeSettings.json
+capchild/Makefile
+capchild/Makefile.in
+capchild/doxygen.cfg
+caputils/Makefile.in
