@@ -972,7 +972,7 @@ get_data_link_types(pcap_t *pch, interface_options *interface_opts,
 
 /* Get supported timestamp types for a libpcap device.  */
 static GList*
-get_pcap_timestamp_types(pcap_t *pch, char **err_str)
+get_pcap_timestamp_types(pcap_t *pch _U_, char **err_str _U_)
 {
 	GList *list = NULL;
 #ifdef HAVE_PCAP_SET_TSTAMP_TYPE
