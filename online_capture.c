@@ -96,6 +96,13 @@ ws_capture_t *ws_capture_open_live(const char *interface_name, int flags, struct
             return NULL;
     }
 
+    if (!interface_name && tstamp_type) {
+            _err = __LINE__;
+            _err_info = strdup("Can't specify Timestamp type with default (==NULL) interface. Name the interface explicitly instead.");
+            PROVIDE_ERRORS;
+            return NULL;
+    }
+
     ws_capture_t *cap = g_malloc0(sizeof *cap + sizeof *cap->dumpcap);
 
     pipe_input = &cap->dumpcap->pipe_input;

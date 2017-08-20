@@ -62,13 +62,14 @@ enum {
 
 /**
  * \param interface name retrieved with \sa ws_capture_list_interfaces
- * \param flags must be zero
+ * \param flags Timestamp types and/or monitor mode
  * \param callbacks Callbacks for events relating to the live capture. May be NULL
  * \param [out] err integer to store error code to or NULL
  * \param [out] err_info pointer to store error string to or NULL. must be freed with g_free
  * \returns a handle identifying the capture
  *
  * \brief Starts sniffing on a network interface or NULL on failure
+ * \bug timestamps in flags were ignored when interface_str == NULL, thus this temporarily fails
  */
 ws_capture_t *ws_capture_open_live(const char *interface_str, int flags, struct ws_capture_callback *callbacks, int *err, char **err_info);
 
