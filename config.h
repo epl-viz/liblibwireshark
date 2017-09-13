@@ -7,8 +7,6 @@
 #ifndef LIBLIBWIRESHARK_CONFIG_H_
 #define LIBLIBWIRESHARK_CONFIG_H_
 
-#define WTAP_MAX_PACKET_SIZE 65536
-
 #ifdef __GNUC__
 #define _U_ __attribute__((unused))
 #else

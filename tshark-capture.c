@@ -11,6 +11,7 @@
 #include <log.h>
 #include <file.h>
 #include <wsutil/filesystem.h>
+#include <wiretap/wtap.h>
 #include "ws_dissect.h"
 #include "ws_capture.h"
 #include "ws_capture-internal.h"
@@ -371,7 +372,7 @@ cf_open(capture_file *cf, const char *fname, unsigned int type, gboolean is_temp
     cf->snap      = wtap_snapshot_length(cf->wth);
     if (cf->snap == 0) {
         /* Snapshot length not known. */
-        cf->snap = WTAP_MAX_PACKET_SIZE;
+        cf->snap = WTAP_MAX_PACKET_SIZE_STANDARD;
     }
     nstime_set_zero(&cf->elapsed_time);
 
