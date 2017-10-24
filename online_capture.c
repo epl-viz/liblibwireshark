@@ -89,6 +89,7 @@ ws_capture_t *ws_capture_open_live(const char *interface_name, int flags, struct
         case WS_CAPTURE_TSTAMP_HOST_HIPREC:      tstamp_type = "host_hiprec"; break;
         case WS_CAPTURE_TSTAMP_ADAPTER:          tstamp_type = "adapter"; break; 
         case WS_CAPTURE_TSTAMP_ADAPTER_UNSYNCED: tstamp_type = "adapter_unsynced"; break;
+        case 0: break;
         default:
             _err = __LINE__;
             _err_info = strdup("Can't specify multiple CAPTURE_TSTAMP_ types");
