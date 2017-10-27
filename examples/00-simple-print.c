@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
     filename = argv[optind];
 
-    if (access(filename, F_OK) == -1) {
+    if (strcmp(filename, "-") != 0 && access(filename, F_OK) == -1) {
         fprintf(stderr, "File '%s' doesn't exist.\n", filename);
         return 1;
     }
