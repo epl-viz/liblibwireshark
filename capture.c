@@ -60,9 +60,9 @@ ws_capture_t *ws_capture_open_offline(const char *path, int flags, int *err, cha
     cfile.filename = g_strdup(path);
     /*if ((flags & WS_CAPTURE_SEQUENTIAL) == WS_CAPTURE_SEQUENTIAL) {*/
     ws_buffer_init(&buf, 1500);
+    gboolean do_random = (strcmp(path, "-") == 0) ? FALSE : TRUE;
 
-
-    cfile.wth = wtap_open_offline(cfile.filename, WTAP_TYPE_AUTO, &_err, &_err_info, TRUE);
+    cfile.wth = wtap_open_offline(cfile.filename, WTAP_TYPE_AUTO, &_err, &_err_info, do_random);
     if (cfile.wth == NULL) {
         PROVIDE_ERRORS;
         return NULL;
