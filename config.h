@@ -25,10 +25,10 @@
 #define VERSION_EXTRA ""
 
 /* Version number of package */
-#define VERSION "2.3.0"
+#define VERSION "2.4.5"
 #define VERSION_MAJOR 2
-#define VERSION_MINOR 3
-#define VERSION_MICRO 0
+#define VERSION_MINOR 4
+#define VERSION_MICRO 5
 
 #define VERSION_FLAVOR "Development Build"
 
@@ -413,7 +413,7 @@ declares pcap_if_t. */
 #define PCAP_NG_DEFAULT 1
 
 /* Plugin installation directory */
-#define PLUGIN_INSTALL_DIR "plugins/2.3.0"
+#define PLUGIN_INSTALL_DIR "plugins/2.4.5"
 
 /* Define if we are using version of of the Portaudio library API */
 /* #undef PORTAUDIO_API_1 */
@@ -501,13 +501,13 @@ typedef int ssize_t;
 
 #else
 
-#define HAVE_FCNTL_H
-#define HAVE_UNISTD_H
-#define HAVE_SYS_STAT_H
-#define HAVE_SYS_WAIT_H
-#define HAVE_SYS_IOCTL_H
-#define HAVE_SYS_SOCKET_H
-#define HAVE_SYS_TYPES_H
+#define HAVE_FCNTL_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_WAIT_H 1
+#define HAVE_SYS_IOCTL_H 1
+#define HAVE_SYS_SOCKET_H 1
+#define HAVE_SYS_TYPES_H 1
 
 /* Define if pcap_breakloop is known */
 #define HAVE_PCAP_BREAKLOOP 1
