@@ -6,14 +6,14 @@ As libwireshark is not public API, it is prone to change and break non-official 
 This project aims to provide a thin frequently-updated wrapper around the core capture/dissect functionality that other applications can then link against.
 
 
-Tested working with Wireshark `v2.4.0` on macOS Sierra
+(Last) tested working with Wireshark `v2.4.5`.
 
 #### Usage
 
     mkdir build && cd build
     cmake ..
     make
-    ./simple_print -f ../test/1.pcap
+    ./simple_print -t text ../samples/1-EPL-Frame.pcapng
 
 #### License
 
